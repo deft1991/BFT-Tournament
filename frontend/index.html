@@ -7,13 +7,14 @@
     <script src="http://cdnjs.cloudflare.com/ajax/libs/jsPlumb/1.4.1/jquery.jsPlumb-1.4.1-all-min.js"></script>
 	<script src="js/bootstrap/js/bootstrap.js"></script>
 	<script src="js/contextMenu/contextMenu.js"></script>
-	<link rel="stylesheet" href="css/main.css">
+	<script src="js/plumb.js"></script>
+	<script src="js/main.js"></script>
+	<link href="css/main.css"  rel="stylesheet" type="text/css">
 	<link href="js/bootstrap/css/bootstrap.css" rel="stylesheet" type="text/css"/>
 	<link href="js/bootstrap/css/bootstrap-theme.css" rel="stylesheet" type="text/css"/>
-    <link href="css/styles.css" rel="stylesheet" type="text/css"/>
 	<link href="js/contextMenu/contextMenu.css" rel="stylesheet" type="text/css"/>
 </head>
-<body style="padding-top:10px">
+<body style="padding-top:10px" onload="Init()">
 
 <div class="container">
 	<div class="row">
@@ -65,7 +66,6 @@
 			</div>
 			<div class="row" style="padding-top: 5px">
 				<div id = "workzone" class="col-md-11" style="height:500px; max-height:700px; min-height: 500px; border:solid; overflow:scroll;">
-				
 				</div>
 			</div>
 			<div class="row">
@@ -76,253 +76,5 @@
 		</div>
 	</div>
 </div>
-
-<style>
-
-.project {
-  border: 1px solid gray;
-  width: 50px;
-  height: 50px;
-  background: #4DAF7C;
-  color: #ffffff;
-  text-align:center;
-}
-
-.absoluteEl {
-	position: absolute;
-}
-
-.tableNumber {
-  width: 100px;
-  height: 50px;
-  border: solid 4px;
-  color: gray;
-  background: yellow;
-  text-align:center;
-}
-
-
-.task {
-  color: #723D61;
-  font-size: 16px;
-  border: 1px solid black;
-  background-color: #ddddff;
-}
-
-.border {
-  border-style: solid;
-  border-width: 2px;
-  border-color: red;
-}
-</style>
-
-<script>
-var menu = [{
-        name: 'update',
-        img: 'img/add.png',
-        title: 'update button',
-        fun: function () {
-            alert('i am update button');
-        }
-    }, {
-        name: 'delete',
-        img: 'img/remove.png',
-        title: 'delete button',
-        fun: function () {
-            alert('i am delete button');
-        }
-    }];
-	
-	
-var i = 1;
-	
-var anEndpointSource = {
-                endpoint: "Dot",
-                isSource: true,
-                isTarget: false,
-                maxConnections: 1,
-                anchor: [1,0.5,0,0]
-            };
-
-            var anEndpointDestination = {
-                endpoint: "Dot",
-                isSource: false,
-                isTarget: true,
-                maxConnections: 1,
-                anchor: [0,0.5,0,0]
-            };
-			
-jsPlumb.ready(function() {
-
-  jsPlumb.Defaults.Container=$("#workzone");
-  jsPlumb.Defaults.PaintStyle = { strokeStyle:"#F09E30", lineWidth:2, dashstyle: '3 3', };
-  jsPlumb.Defaults.EndpointStyle = { radius:7, fillStyle:"#F09E30" };
-  jsPlumb.importDefaults({Connector : [ "Bezier", { curviness:50 } ]});
-      
-   
-  jsPlumb.bind("connection", function(info) {
-	var op1 = info.sourceId.includes("add") || info.sourceId.includes("sub") || info.sourceId.includes("mul") || info.sourceId.includes("div");
-	var op2 = info.targetId.includes("add") || info.targetId.includes("sub") || info.targetId.includes("mul") || info.targetId.includes("div");
-	  
-	var c1 = info.sourceId.includes("number") || info.sourceId.includes("table");
-	var c2 = info.targetId.includes("number") || info.targetId.includes("table");
-	
-	if((op1 && op2) || (c1 && c2)){
-		jsPlumb.detach(info.connection);
-	}
-});
-		
-
-  $("#nav").on('click','.btnNav',function(e) {
-  
-    var id = e.currentTarget.getAttribute("id");
-	var cl = "";
-	//if(id == "tbl") cl = "glyphicon glyphicon-text-width";
-	//if(id == "num") cl = "glyphicon glyphicon-bold";
-	if(id == "add") cl = "glyphicon glyphicon-plus";
-	if(id == "sub") cl = "glyphicon glyphicon-minus";
-	if(id == "mul") cl = "glyphicon glyphicon-remove";
-	if(id == "div") cl = "glyphicon glyphicon-italic";
-	if(id == "temp") cl = "glyphicon glyphicon-search";
-	
-	var newAgent = $('<div>').attr('id', id + i).addClass('project').addClass('absoluteEl');
-	var newSpan = $('<span>').attr('id', "span" + id + i).addClass(cl);
-	newAgent.text(id + i);
-	$('#workzone').append(newAgent);
-	$('#' + id + i).append("<br>");
-	$('#' + id + i).append(newSpan);
-	
-	
-	$('#' + id + i).contextMenu(menu,{triggerOn:'contextmenu'});
-
-    jsPlumb.draggable(newAgent, {
-      containment: 'parent'
-    });
-	
-	jsPlumb.addEndpoint(
-                    newAgent,
-                    anEndpointSource
-                );
-                
-                jsPlumb.addEndpoint(
-                    newAgent,
-                    anEndpointDestination
-                );
-    i++;
-		
-  });
-  
-  
-  $("#workzone").on('click','.absoluteEl',function(e) {
-  
-    var id = e.currentTarget.getAttribute("id");
-	if($("#" + id).hasClass( "border" )){
-		$("#" + id).removeClass('border');
-	}else{
-		$("#" + id).addClass('border');
-	}
-	
-	});
-	
-  $("#trash").click(function(){
-   $('#workzone').find('.absoluteEl').each(function( i, el ) {
-		var e = $("#" + el.getAttribute("id"));
-		
-		if(e.hasClass( "border" )){
-            var endpoints = jsPlumb.getEndpoints(e);
-			endpoints.forEach(function(item, i, arr){jsPlumb.deleteEndpoint(item);})
-			e.remove();
-			
-		}
-	});
-  });
-
-});
-
-
-    function previewFile() {
-        var file = document.querySelector('input[type=file]').files[0];
-        var reader = new FileReader();
-
-        reader.addEventListener("load", function () {
-            console.log(reader.result);
-            var data = JSON.parse(reader.result);
-            console.log(data);
-
-            data.forEach(function (item) {
-                item.id = item.type + '_' + item.name
-            });
-
-            console.log(data);
-
-            var toolBar = document.getElementById('toolBar'),
-                frag = document.createDocumentFragment();
-
-            data.forEach(function (item) {
-
-                var el = document.createElement("div");
-                el.id = item.id;
-                el.className = "draggable tableNumber";
-                el.ondblclick = function () {
-                    window.open('edit.html', '', ' scrollbars=yes,menubar=no,width=500, resizable=yes,toolbar=no,location=no,status=no');
-                };
-				
-				el.onclick = function(e) {
-					var id = e.currentTarget.getAttribute("id");
-					var cl = "";
-					if(id.includes("table")) cl = "glyphicon glyphicon-text-width";
-					if(id.includes("number")) cl = "glyphicon glyphicon-bold";
-					
-					var newAgent = $('<div>').attr('id', id + i).addClass('tableNumber').addClass('absoluteEl');
-					var newSpan = $('<span>').attr('id', "span" + id + i).addClass(cl);
-					newAgent.text(id);
-					
-					$('#workzone').append(newAgent);
-					$('#' + id + i).append("<br>");
-					$('#' + id + i).append(newSpan);
-					
-					$('#' + id + i).contextMenu(menu,{triggerOn:'contextmenu'});
-
-					jsPlumb.draggable(newAgent, {
-					  containment: 'parent'
-					});
-					
-					jsPlumb.addEndpoint(
-									newAgent,
-									anEndpointSource
-								);
-								
-								jsPlumb.addEndpoint(
-									newAgent,
-									anEndpointDestination
-								);
-					
-					
-
-					i++;
-			    };
-                var txt = document.createTextNode(item.name + '(' + item.type + ')');
-                el.appendChild(txt);
-                frag.appendChild(el);
-				
-				
-            });
-            toolBar.appendChild(frag);
-			
-			$('#toolBar').find('.tableNumber').each(function( i, el ) {
-				$("#" + el.getAttribute("id")).contextMenu(menu,{triggerOn:'contextmenu'});
-			});
-
-
-        }, false);
-
-        if (file) {
-            reader.readAsText(file);
-        }
-    }
-
-</script>
-
-
 </body>
 </html>
