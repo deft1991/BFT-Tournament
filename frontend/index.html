@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+	<script src="http://cdnjs.cloudflare.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+    <script src="http://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.9.2/jquery-ui.min.js"></script>
+    <script src="http://cdnjs.cloudflare.com/ajax/libs/jsPlumb/1.4.1/jquery.jsPlumb-1.4.1-all-min.js"></script>
+	<script src="js/bootstrap/js/bootstrap.js"></script>
+	<link rel="stylesheet" href="css/main.css">
+	<link href="js/bootstrap/css/bootstrap.css" rel="stylesheet" type="text/css"/>
+	<link href="js/bootstrap/css/bootstrap-theme.css" rel="stylesheet" type="text/css"/>
+    <link href="css/styles.css" rel="stylesheet" type="text/css"/>
+</head>
+<body style="padding-top:10px">
+
+<div class="container">
+	<div class="row">
+		<div id = "toolBar1" class="col-md-1">
+		</div>
+		<div class="col-md-11">
+			<div class="row">
+				<div id="nav" class="col-md-6">
+					<!-- <button id="tbl" type="button" class="btn btn-success btn-lg btnNav">  -->
+						<!-- <span class="glyphicon glyphicon-text-width"></span> -->
+					<!-- </button> -->
+					<!-- <button id="num" type="button" class="btn btn-success btn-lg btnNav">  -->
+						<!-- <span class="glyphicon glyphicon-bold"></span> -->
+					<!-- </button> -->
+					<!-- </button> -->
+					<button id="add" type="button" class="btn btn-success btn-lg btnNav"> 
+						<span class="glyphicon glyphicon-plus"></span>
+					</button>
+					<button id="sub" type="button" class="btn btn-success btn-lg btnNav"> 
+						<span class="glyphicon glyphicon-minus"></span>
+					</button>
+					<button id="mul" type="button" class="btn btn-success btn-lg btnNav"> 
+						<span class="glyphicon glyphicon-remove"></span>
+					</button>
+					<button id="div" type="button" class="btn btn-success btn-lg btnNav"> 
+						<span class="glyphicon glyphicon-italic"></span>
+					</button>
+					<button id="temp" type="button" class="btn btn-success btn-lg btnNav"> 
+						<span class="glyphicon glyphicon-search"></span>
+					</button>
+					<button id="trash" type="button" class="btn btn-success btn-lg"> 
+						<span class="glyphicon glyphicon-trash"></span>
+					</button>
+				</div>
+				<div class="col-md-6" style="text-align: left">
+					<span class="btn btn-success btn-file  btn-lg glyphicon glyphicon-check">
+						<input type="file" onchange="previewFile()"/>
+					</span>
+					<button id="validate" type="button" class="btn btn-success btn-lg"> 
+						<span class="glyphicon glyphicon-check"></span>
+					</button>
+					<button id="run" type="button" class="btn btn-success btn-lg"> 
+						<span class="glyphicon glyphicon-play"></span>
+					</button>
+					<button id="save" type="button" class="btn btn-success btn-lg"> 
+						<span class="glyphicon glyphicon-save"></span>
+					</button>
+				</div>
+			</div>
+			<div class="row" style="padding-top: 5px">
+				<div id = "workzone" class="col-md-11" style="height:500px; max-height:700px; min-height: 500px; border:solid; overflow:scroll;">
+				
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-md-12" id = "toolBar">
+				
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<style>
+
+.project {
+  border: 1px solid gray;
+  width: 50px;
+  height: 50px;
+  background: #4DAF7C;
+  color: #ffffff;
+  text-align:center;
+}
+
+.absoluteEl {
+	position: absolute;
+}
+
+.tableNumber {
+  width: 100px;
+  height: 50px;
+  border: solid 4px;
+  color: gray;
+  background: yellow;
+  text-align:center;
+}
+
+
+.task {
+  color: #723D61;
+  font-size: 16px;
+  border: 1px solid black;
+  background-color: #ddddff;
+}
+
+.border {
+  border-style: solid;
+  border-width: 2px;
+  border-color: red;
+}
+</style>
+
+<script>
+var i = 1;
+	
+var anEndpointSource = {
+                endpoint: "Dot",
+                isSource: true,
+                isTarget: false,
+                maxConnections: 1,
+                anchor: [1,0.5,0,0]
+            };
+
+            var anEndpointDestination = {
+                endpoint: "Dot",
+                isSource: false,
+                isTarget: true,
+                maxConnections: 1,
+                anchor: [0,0.5,0,0]
+            };
+			
+jsPlumb.ready(function() {
+
+  jsPlumb.Defaults.Container=$("#workzone");
+  jsPlumb.Defaults.PaintStyle = { strokeStyle:"#F09E30", lineWidth:2, dashstyle: '3 3', };
+  jsPlumb.Defaults.EndpointStyle = { radius:7, fillStyle:"#F09E30" };
+  jsPlumb.importDefaults({Connector : [ "Bezier", { curviness:50 } ]});
+      
+   
+  
+		
+
+  $("#nav").on('click','.btnNav',function(e) {
+  
+    var id = e.currentTarget.getAttribute("id");
+	var cl = "";
+	//if(id == "tbl") cl = "glyphicon glyphicon-text-width";
+	//if(id == "num") cl = "glyphicon glyphicon-bold";
+	if(id == "add") cl = "glyphicon glyphicon-plus";
+	if(id == "sub") cl = "glyphicon glyphicon-minus";
+	if(id == "mul") cl = "glyphicon glyphicon-remove";
+	if(id == "div") cl = "glyphicon glyphicon-italic";
+	if(id == "temp") cl = "glyphicon glyphicon-search";
+	
+	var newAgent = $('<div>').attr('id', id + i).addClass('project').addClass('absoluteEl');
+	var newSpan = $('<span>').attr('id', "span" + id + i).addClass(cl);
+	newAgent.text(id + i);
+	$('#workzone').append(newAgent);
+	$('#' + id + i).append("<br>");
+	$('#' + id + i).append(newSpan);
+
+    jsPlumb.draggable(newAgent, {
+      containment: 'parent'
+    });
+	
+	jsPlumb.addEndpoint(
+                    newAgent,
+                    anEndpointSource
+                );
+                
+                jsPlumb.addEndpoint(
+                    newAgent,
+                    anEndpointDestination
+                );
+	
+	
+
+    i++;
+		
+  });
+  
+  
+  $("#workzone").on('click','.absoluteEl',function(e) {
+  
+    var id = e.currentTarget.getAttribute("id");
+	if($("#" + id).hasClass( "border" )){
+		$("#" + id).removeClass('border');
+	}else{
+		$("#" + id).addClass('border');
+	}
+	
+	});
+	
+  $("#trash").click(function(){
+   $('#workzone').find('.absoluteEl').each(function( i, el ) {
+		var e = $("#" + el.getAttribute("id"));
+		if(e.hasClass( "border" )){
+            var endpoints = jsPlumb.getEndpoints(e);
+			endpoints.forEach(function(item, i, arr){jsPlumb.deleteEndpoint(item);})
+			e.remove();
+			
+		}
+	});
+  });
+
+});
+
+
+    function previewFile() {
+        var file = document.querySelector('input[type=file]').files[0];
+        var reader = new FileReader();
+
+        reader.addEventListener("load", function () {
+            console.log(reader.result);
+            var data = JSON.parse(reader.result);
+            console.log(data);
+
+            data.forEach(function (item) {
+                item.id = item.type + '_' + item.name
+            });
+
+            console.log(data);
+
+            var toolBar = document.getElementById('toolBar'),
+                frag = document.createDocumentFragment();
+
+            data.forEach(function (item) {
+
+                var el = document.createElement("div");
+                el.id = item.id;
+                el.className = "draggable tableNumber";
+                el.ondblclick = function () {
+                    window.open('edit.html', '', ' scrollbars=yes,menubar=no,width=500, resizable=yes,toolbar=no,location=no,status=no');
+                };
+				
+				el.onclick = function(e) {
+					var id = e.currentTarget.getAttribute("id");
+					var cl = "";
+					if(id.includes("table")) cl = "glyphicon glyphicon-text-width";
+					if(id.includes("number")) cl = "glyphicon glyphicon-bold";
+					
+					var newAgent = $('<div>').attr('id', id + i).addClass('tableNumber').addClass('absoluteEl');
+					var newSpan = $('<span>').attr('id', "span" + id + i).addClass(cl);
+					newAgent.text(id);
+					
+					$('#workzone').append(newAgent);
+					$('#' + id + i).append("<br>");
+					$('#' + id + i).append(newSpan);
+
+					jsPlumb.draggable(newAgent, {
+					  containment: 'parent'
+					});
+					
+					jsPlumb.addEndpoint(
+									newAgent,
+									anEndpointSource
+								);
+								
+								jsPlumb.addEndpoint(
+									newAgent,
+									anEndpointDestination
+								);
+					
+					
+
+					i++;
+			    };
+			  
+                var txt = document.createTextNode(item.name + '(' + item.type + ')');
+                el.appendChild(txt);
+                frag.appendChild(el);
+				
+				
+				
+				
+				
+
+            });
+            toolBar.appendChild(frag);
+
+
+        }, false);
+
+        if (file) {
+            reader.readAsText(file);
+        }
+    }
+
+</script>
+
+
+</body>
+</html>
