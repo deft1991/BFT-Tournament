@@ -160,7 +160,17 @@ jsPlumb.ready(function() {
   jsPlumb.importDefaults({Connector : [ "Bezier", { curviness:50 } ]});
       
    
-  
+  jsPlumb.bind("connection", function(info) {
+	var op1 = info.sourceId.includes("add") || info.sourceId.includes("sub") || info.sourceId.includes("mul") || info.sourceId.includes("div");
+	var op2 = info.targetId.includes("add") || info.targetId.includes("sub") || info.targetId.includes("mul") || info.targetId.includes("div");
+	  
+	var c1 = info.sourceId.includes("number") || info.sourceId.includes("table");
+	var c2 = info.targetId.includes("number") || info.targetId.includes("table");
+	
+	if((op1 && op2) || (c1 && c2)){
+		jsPlumb.detach(info.connection);
+	}
+});
 		
 
   $("#nav").on('click','.btnNav',function(e) {
