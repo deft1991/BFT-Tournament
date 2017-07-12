@@ -6,10 +6,12 @@
     <script src="http://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.9.2/jquery-ui.min.js"></script>
     <script src="http://cdnjs.cloudflare.com/ajax/libs/jsPlumb/1.4.1/jquery.jsPlumb-1.4.1-all-min.js"></script>
 	<script src="js/bootstrap/js/bootstrap.js"></script>
+	<script src="js/contextMenu/contextMenu.js"></script>
 	<link rel="stylesheet" href="css/main.css">
 	<link href="js/bootstrap/css/bootstrap.css" rel="stylesheet" type="text/css"/>
 	<link href="js/bootstrap/css/bootstrap-theme.css" rel="stylesheet" type="text/css"/>
     <link href="css/styles.css" rel="stylesheet" type="text/css"/>
+	<link href="js/contextMenu/contextMenu.css" rel="stylesheet" type="text/css"/>
 </head>
 <body style="padding-top:10px">
 
@@ -47,7 +49,7 @@
 					</button>
 				</div>
 				<div class="col-md-6" style="text-align: left">
-					<span class="btn btn-success btn-file  btn-lg glyphicon glyphicon-check">
+					<span class="btn btn-success btn-file  btn-lg glyphicon glyphicon-folder-open">
 						<input type="file" onchange="previewFile()"/>
 					</span>
 					<button id="validate" type="button" class="btn btn-success btn-lg"> 
@@ -115,6 +117,23 @@
 </style>
 
 <script>
+var menu = [{
+        name: 'update',
+        img: 'img/add.png',
+        title: 'update button',
+        fun: function () {
+            alert('i am update button');
+        }
+    }, {
+        name: 'delete',
+        img: 'img/remove.png',
+        title: 'delete button',
+        fun: function () {
+            alert('i am delete button');
+        }
+    }];
+	
+	
 var i = 1;
 	
 var anEndpointSource = {
@@ -162,6 +181,9 @@ jsPlumb.ready(function() {
 	$('#workzone').append(newAgent);
 	$('#' + id + i).append("<br>");
 	$('#' + id + i).append(newSpan);
+	
+	
+	$('#' + id + i).contextMenu(menu,{triggerOn:'contextmenu'});
 
     jsPlumb.draggable(newAgent, {
       containment: 'parent'
@@ -176,9 +198,6 @@ jsPlumb.ready(function() {
                     newAgent,
                     anEndpointDestination
                 );
-	
-	
-
     i++;
 		
   });
@@ -198,6 +217,7 @@ jsPlumb.ready(function() {
   $("#trash").click(function(){
    $('#workzone').find('.absoluteEl').each(function( i, el ) {
 		var e = $("#" + el.getAttribute("id"));
+		
 		if(e.hasClass( "border" )){
             var endpoints = jsPlumb.getEndpoints(e);
 			endpoints.forEach(function(item, i, arr){jsPlumb.deleteEndpoint(item);})
@@ -250,6 +270,8 @@ jsPlumb.ready(function() {
 					$('#workzone').append(newAgent);
 					$('#' + id + i).append("<br>");
 					$('#' + id + i).append(newSpan);
+					
+					$('#' + id + i).contextMenu(menu,{triggerOn:'contextmenu'});
 
 					jsPlumb.draggable(newAgent, {
 					  containment: 'parent'
@@ -269,18 +291,17 @@ jsPlumb.ready(function() {
 
 					i++;
 			    };
-			  
                 var txt = document.createTextNode(item.name + '(' + item.type + ')');
                 el.appendChild(txt);
                 frag.appendChild(el);
 				
 				
-				
-				
-				
-
             });
             toolBar.appendChild(frag);
+			
+			$('#toolBar').find('.tableNumber').each(function( i, el ) {
+				$("#" + el.getAttribute("id")).contextMenu(menu,{triggerOn:'contextmenu'});
+			});
 
 
         }, false);
