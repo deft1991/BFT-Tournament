@@ -6,20 +6,43 @@ var menuContextConfig = [{
         name: 'update',
         img: 'img/add.png',
         title: 'update button',
-        fun: function () {
-            alert('i am update button');
+        fun: function (e1,e2) {
+			$("#elementId").val(e1.trigger[0].id);
+            $("#myModal").modal('show');
         }
     }, {
         name: 'delete',
         img: 'img/remove.png',
         title: 'delete button',
-        fun: function () {
+        fun: function (e1,e2) {
             alert('i am delete button');
         }
     }];
 	
 	
 var Init = function(){
+	
+//========model window===========
+$('#myModal').on('shown.bs.modal', function (event) {
+
+});
+
+// при открытии модального окна
+$('#myModal').on('show.bs.modal', function (event) {
+  var val = $('#elementId').val();
+  var newDiv = $('<div>').attr('id', "div" + val);
+  newDiv.text(val);
+  newDiv.appendTo('#modal-body');
+});
+
+$('#myModal').on('hidden.bs.modal', function () {
+  
+  var val = $('#elementId').val();
+  $('#div' + val).remove();
+  $('#elementId').val(-1);
+  
+});
+//===============================
 
 $("#nav").on('click','.btnNav',function(e) {
   
@@ -38,7 +61,8 @@ $("#nav").on('click','.btnNav',function(e) {
 	$('#' + id + i).append("<br>");
 	$('#' + id + i).append(newSpan);
 	
-	$('#' + id + i).contextMenu(menuContextConfig,{triggerOn:'contextmenu'});
+	if(id == "temp")
+		$('#' + id + i).contextMenu(menuContextConfig,{triggerOn:'contextmenu'});
 
     addDraggableElementEndPoint(newAgent);
 	
@@ -94,9 +118,6 @@ var previewFile = function(){
                 var el = document.createElement("div");
                 el.id = item.id;
                 el.className = "draggable tableNumber";
-                el.ondblclick = function () {
-                    window.open('edit.html', '', ' scrollbars=yes,menubar=no,width=500, resizable=yes,toolbar=no,location=no,status=no');
-                };
 				
 				el.onclick = function(e) {
 					var id = e.currentTarget.getAttribute("id");
