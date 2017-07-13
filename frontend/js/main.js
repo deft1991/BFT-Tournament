@@ -15,7 +15,7 @@ var menuContextConfig = [{
         img: 'img/remove.png',
         title: 'delete button',
         fun: function (e1,e2) {
-            alert('i am delete button');
+			deleteEndPointsByElement($('#' + e1.trigger[0].id));
         }
     }];
 	
@@ -36,18 +36,20 @@ $('#myModal').on('show.bs.modal', function (event) {
   newDiv.append(newTable);
   newDiv.appendTo('#modal-body');
   $('#example')[0].style.width = "100%";
-  var data = storageData[val].source == null ? storageData[val].value : storageData[storageData[val].source].value;
-  $("#example").DataTable( {
-        data: data,
-        columns: [
-            { title: "Name" },
-            { title: "Position" },
-            { title: "Office" },
-            { title: "Extn." },
-            { title: "Start date" },
-            { title: "Salary" }
-        ]
-    } );
+  if(storageData[val] !== undefined){
+	  var data = storageData[val].source == null ? storageData[val].value : storageData[storageData[val].source].value;
+	  $("#example").DataTable( {
+			data: data,
+			columns: [
+				{ title: "Name" },
+				{ title: "Position" },
+				{ title: "Office" },
+				{ title: "Extn." },
+				{ title: "Start date" },
+				{ title: "Salary" }
+			]
+		} );
+  }
 });
 
 $('#myModal').on('hidden.bs.modal', function () {
@@ -70,6 +72,8 @@ $("#nav").on('click','.btnNav',function(e) {
 	cl["temp"] = "glyphicon glyphicon-search";
 	
 	var newAgent = $('<div>').attr('id', id + i).addClass('project').addClass('absoluteEl');
+	if(id == "temp")
+		newAgent.addClass("tempOps");
 	var newSpan = $('<span>').attr('id', "span" + id + i).addClass(cl[id]);
 	newAgent.text(id + i);
 	$('#workzone').append(newAgent);

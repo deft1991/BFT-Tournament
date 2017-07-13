@@ -10,7 +10,8 @@ jsPlumb.ready(function() {
   jsPlumb.bind("connection", function(info) {
     var target = $('#' + info.targetId);
 	var source = $('#' + info.sourceId);
-	if((target.hasClass("project") && source.hasClass("project")) 
+	var tempOps = target.hasClass("tempOps") && source.hasClass("tempOps") || (!target.hasClass("tempOps") && !source.hasClass("tempOps"));
+	if((target.hasClass("project") && source.hasClass("project") && tempOps) 
 		|| (target.hasClass("tableNumber") && source.hasClass("tableNumber"))){
 		jsPlumb.detach(info.connection);
 	}
@@ -20,8 +21,11 @@ jsPlumb.ready(function() {
 
 var deleteEndPointsByElement = function(el){
 	var endpoints = jsPlumb.getEndpoints(el);
-			endpoints.forEach(function(item, i, arr){jsPlumb.deleteEndpoint(item);})
-			el.remove();
+	endpoints.forEach(function(item, i, arr){jsPlumb.deleteEndpoint(item);})
+	el.remove();
+	if(storageData[el[0].id] !== undefined){
+		delete storageData[el[0].id];
+	}
 };
 
 
