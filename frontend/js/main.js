@@ -31,8 +31,23 @@ $('#myModal').on('shown.bs.modal', function (event) {
 $('#myModal').on('show.bs.modal', function (event) {
   var val = $('#elementId').val();
   var newDiv = $('<div>').attr('id', "div" + val);
-  newDiv.text(val);
+  //newDiv.text(val);
+  var newTable = $('<table>').attr('id', "example").addClass("display");
+  newDiv.append(newTable);
   newDiv.appendTo('#modal-body');
+  $('#example')[0].style.width = "100%";
+  var data = storageData[val].source == null ? storageData[val].value : storageData[storageData[val].source].value;
+  $("#example").DataTable( {
+        data: data,
+        columns: [
+            { title: "Name" },
+            { title: "Position" },
+            { title: "Office" },
+            { title: "Extn." },
+            { title: "Start date" },
+            { title: "Salary" }
+        ]
+    } );
 });
 
 $('#myModal').on('hidden.bs.modal', function () {
@@ -92,8 +107,14 @@ $("#nav").on('click','.btnNav',function(e) {
 	});
   });
 
-};	
+};
 
+function DataSourceEl(source, value){
+	this.source = source;
+	this.value = value;
+}	
+
+var storageData = {};
 
 var previewFile = function(){
         var file = document.querySelector('input[type=file]').files[0];
@@ -106,6 +127,7 @@ var previewFile = function(){
 
             data.forEach(function (item) {
                 item.id = item.type + '_' + item.name
+				storageData[item.id] = new DataSourceEl(null, item.value);
             });
 
             console.log(data);
@@ -134,6 +156,8 @@ var previewFile = function(){
 					$('#' + id + i).append(newSpan);
 					
 					$('#' + id + i).contextMenu(menuContextConfig,{triggerOn:'contextmenu'});
+					
+					storageData[id + i] = new DataSourceEl(id, null);
 
 					addDraggableElementEndPoint(newAgent);
 					
