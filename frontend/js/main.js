@@ -30,6 +30,7 @@ $('#myModal').on('shown.bs.modal', function (event) {
 // при открытии модального окна
 $('#myModal').on('show.bs.modal', function (event) {
   var val = $('#elementId').val();
+  var sData = storageData[val].source == null ? storageData[val] : storageData[storageData[val].source];
   var newDiv = $('<div>').attr('id', "div" + val);
 
     var thead = $('<thead>');
@@ -54,18 +55,15 @@ $('#myModal').on('show.bs.modal', function (event) {
   $('#example')[0].style.width = "100%";
   switch(storageData[val].type){
 	  case 'table':
-		  if(storageData[val] !== undefined){
-			  var sData = storageData[val].source == null ? storageData[val] : storageData[storageData[val].source];
 			  function newTitle(x){var el = {title: x}; return el;}
 			  var tableColumns = sData.columns.map(c=>newTitle(c.name));
 			  var dataTableConf = {};
 			  dataTableConf["data"] = sData.value;
 			  dataTableConf["columns"] = tableColumns;
 			  $("#example").DataTable(dataTableConf);
-		  }
 	  break;
 	  case 'number':
-		$("#example").html('<tr><td align="center"><input type="text" value="'+ storageData[val].value +'" style="width:100%"></input><td></tr>');
+		$("#example").html('<tr><td align="center"><input type="text" value="'+ sData.value +'" style="width:100%"></input><td></tr>');
 	  break;
   }
     newTable.append(thead);
@@ -190,58 +188,70 @@ var previewFile = function(){
         reader.addEventListener("load", function () {
             console.log(reader.result);
             var data = JSON.parse(reader.result);
-            console.log(data);
-
-            data.forEach(function (item) {
-                item.id = item.type + '_' + item.name
-				storageData[item.id] = new DataSourceEl(null, item.value, item.type, item.columns);
-            });
-
-            console.log(data);
 
             var toolBar = document.getElementById('toolBar'),
-                frag = document.createDocumentFragment();
+                frag = document.createDocumentFragment(), foundNew = false;
+				
+			Object.keys(storageData).forEach(function(item, i, arr){ 
+				if(storageData[item].source === undefined){
+					var indexRem = data.findIndex(el=> (el.type + '_' + el.name) === item);
+		
+					if(indexRem == -1){
+						deleteEndPointsByElement($('#'+item));
+					}	
+				}				
+			});
 
             data.forEach(function (item) {
-
-                var el = document.createElement("div");
-                el.id = item.id;
-                el.className = "draggable tableNumber";
+			
+			    item.id = item.type + '_' + item.name;
 				
-				el.onclick = function(e) {
-					var id = e.currentTarget.getAttribute("id");
-					var cl = "";
-					if(id.includes("table")) cl = "glyphicon glyphicon-text-width";
-					if(id.includes("number")) cl = "glyphicon glyphicon-bold";
+				//если нет элемента - создадим
+				if(storageData[item.id] === undefined){
+				    storageData[item.id] = new DataSourceEl(undefined, item.value, item.type, item.columns);
+					var el = document.createElement("div");
+					el.id = item.id;
+					el.className = "draggable tableNumber";
 					
-					var newAgent = $('<div>').attr('id', id + i).addClass('tableNumber').addClass('absoluteEl');
-					var newSpan = $('<span>').attr('id', "span" + id + i).addClass(cl);
-					newAgent.text(id);
-					
-					$('#workzone').append(newAgent);
-					$('#' + id + i).append("<br>");
-					$('#' + id + i).append(newSpan);
-					
-					$('#' + id + i).contextMenu(menuContextConfig,{triggerOn:'contextmenu'});
-					
-					storageData[id + i] = new DataSourceEl(id, null, storageData[id].type, storageData[id].columns);
+					el.onclick = function(e) {
+						var id = e.currentTarget.getAttribute("id");
+						var cl = "";
+						if(id.includes("table")) cl = "glyphicon glyphicon-text-width";
+						if(id.includes("number")) cl = "glyphicon glyphicon-bold";
+						
+						var newAgent = $('<div>').attr('id', id + i).addClass('tableNumber').addClass('absoluteEl');
+						var newSpan = $('<span>').attr('id', "span" + id + i).addClass(cl);
+						newAgent.text(id);
+						
+						$('#workzone').append(newAgent);
+						$('#' + id + i).append("<br>");
+						$('#' + id + i).append(newSpan);
+						
+						$('#' + id + i).contextMenu(menuContextConfig,{triggerOn:'contextmenu'});
+						
+						storageData[id + i] = new DataSourceEl(id, undefined, storageData[id].type, storageData[id].columns);
 
-					addDraggableElementEndPoint(newAgent, "tableNumber");
-					
-					i++;
-			    };
-                var txt = document.createTextNode(item.name + '(' + item.type + ')');
-                el.appendChild(txt);
-                frag.appendChild(el);
-				
+						addDraggableElementEndPoint(newAgent, "tableNumber");
+						
+						i++;
+					};
+					var txt = document.createTextNode(item.name + '(' + item.type + ')');
+					el.appendChild(txt);
+					frag.appendChild(el);
+					foundNew = true;
+				}else{
+					//обновим информацию о элементе
+					storageData[item.id] = new DataSourceEl(undefined, item.value, item.type, item.columns);
+				}
 				
             });
-            toolBar.appendChild(frag);
+			if(foundNew)
+				toolBar.appendChild(frag);
 			
 			$('#toolBar').find('.tableNumber').each(function( i, el ) {
 				$("#" + el.getAttribute("id")).contextMenu(menuContextConfig,{triggerOn:'contextmenu'});
 			});
-
+			$('input[type=file]').val('');
 
         }, false);
 

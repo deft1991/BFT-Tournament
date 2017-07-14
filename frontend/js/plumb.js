@@ -52,13 +52,19 @@ jsPlumb.ready(function() {
 
 var deleteEndPointsByElement = function(el){
 	var endpoints = jsPlumb.getEndpoints(el);
-	endpoints.forEach(function(item, i, arr){jsPlumb.deleteEndpoint(item);});
+	if(endpoints !== undefined)
+		endpoints.forEach(function(item, i, arr){jsPlumb.deleteEndpoint(item);});
 	
-	if(storageData[el[0].id] !== undefined){
-		delete storageData[el[0].id];
-	}
+	var childs = [];
+	var id = el[0].id === undefined ? el.id : el[0].id;
+	Object.keys(storageData).forEach(function(item, i, arr){ 
+		if(storageData[item].source == id)
+			deleteEndPointsByElement($('#'+item));
+	});
 	
-	var indexRem = calcPath.findIndex(e=> e.source === el.id);
+	delete storageData[id];
+	
+	var indexRem = calcPath.findIndex(e=> e.source === id);
 	
 	if(indexRem > -1){
 		calcPath.splice(indexRem, 1);
