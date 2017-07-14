@@ -38,18 +38,13 @@ $('#myModal').on('show.bs.modal', function (event) {
   switch(storageData[val].type){
 	  case 'table':
 		  if(storageData[val] !== undefined){
-			  var data = storageData[val].source == null ? storageData[val].value : storageData[storageData[val].source].value;
-			  $("#example").DataTable( {
-					data: data,
-					columns: [
-						{ title: "Name" },
-						{ title: "Position" },
-						{ title: "Office" },
-						{ title: "Extn." },
-						{ title: "Start date" },
-						{ title: "Salary" }
-					]
-				} );
+			  var sData = storageData[val].source == null ? storageData[val] : storageData[storageData[val].source];
+			  function newTitle(x){var el = {title: x}; return el;}
+			  var tableColumns = sData.columns.map(c=>newTitle(c.name));
+			  var dataTableConf = {};
+			  dataTableConf["data"] = sData.value;
+			  dataTableConf["columns"] = tableColumns;
+			  $("#example").DataTable(dataTableConf);
 		  }
 	  break;
 	  case 'number':
@@ -120,10 +115,11 @@ $("#nav").on('click','.btnNav',function(e) {
 
 };
 
-function DataSourceEl(source, value, type){
+function DataSourceEl(source, value, type, columns){
 	this.source = source;
 	this.value = value;
 	this.type = type;
+	this.columns = columns;
 }	
 
 var storageData = {};
@@ -139,7 +135,7 @@ var previewFile = function(){
 
             data.forEach(function (item) {
                 item.id = item.type + '_' + item.name
-				storageData[item.id] = new DataSourceEl(null, item.value, item.type);
+				storageData[item.id] = new DataSourceEl(null, item.value, item.type, item.columns);
             });
 
             console.log(data);
@@ -169,7 +165,7 @@ var previewFile = function(){
 					
 					$('#' + id + i).contextMenu(menuContextConfig,{triggerOn:'contextmenu'});
 					
-					storageData[id + i] = new DataSourceEl(id, null, storageData[id].type);
+					storageData[id + i] = new DataSourceEl(id, null, storageData[id].type, storageData[id].columns);
 
 					addDraggableElementEndPoint(newAgent, "tableNumber");
 					
