@@ -118,6 +118,7 @@ var createFormulsList = function(){
 	if(Object.keys(formuls).length == 0){
 		return [];
 	}
+	var resStr = [];
 	Object.keys(formuls).forEach(function(key, id){
 		
 		var err = false;
@@ -155,6 +156,7 @@ var createFormulsList = function(){
 				}
 			});
 			formuls[key] = resArr.join('');
+			resStr.push(formuls[key]);
 		}else{
 			//ошибка
 		}
@@ -162,7 +164,7 @@ var createFormulsList = function(){
 	});
 	
 	//formuls ассоциативный массив с формулами
-	alert(JSON.stringify(formuls));
+	alert('['+resStr.join('][')+']');
 		
 };
 
