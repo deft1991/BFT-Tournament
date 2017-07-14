@@ -31,25 +31,32 @@ $('#myModal').on('shown.bs.modal', function (event) {
 $('#myModal').on('show.bs.modal', function (event) {
   var val = $('#elementId').val();
   var newDiv = $('<div>').attr('id', "div" + val);
-  //newDiv.text(val);
   var newTable = $('<table>').attr('id', "example").addClass("display");
   newDiv.append(newTable);
   newDiv.appendTo('#modal-body');
   $('#example')[0].style.width = "100%";
-  if(storageData[val] !== undefined){
-	  var data = storageData[val].source == null ? storageData[val].value : storageData[storageData[val].source].value;
-	  $("#example").DataTable( {
-			data: data,
-			columns: [
-				{ title: "Name" },
-				{ title: "Position" },
-				{ title: "Office" },
-				{ title: "Extn." },
-				{ title: "Start date" },
-				{ title: "Salary" }
-			]
-		} );
+  switch(storageData[val].type){
+	  case 'table':
+		  if(storageData[val] !== undefined){
+			  var data = storageData[val].source == null ? storageData[val].value : storageData[storageData[val].source].value;
+			  $("#example").DataTable( {
+					data: data,
+					columns: [
+						{ title: "Name" },
+						{ title: "Position" },
+						{ title: "Office" },
+						{ title: "Extn." },
+						{ title: "Start date" },
+						{ title: "Salary" }
+					]
+				} );
+		  }
+	  break;
+	  case 'number':
+		$("#example").html('<tr><td align="center"><input type="text" value="'+ storageData[val].value +'" style="width:100%"></input><td></tr>');
+	  break;
   }
+  
 });
 
 $('#myModal').on('hidden.bs.modal', function () {
@@ -113,9 +120,10 @@ $("#nav").on('click','.btnNav',function(e) {
 
 };
 
-function DataSourceEl(source, value){
+function DataSourceEl(source, value, type){
 	this.source = source;
 	this.value = value;
+	this.type = type;
 }	
 
 var storageData = {};
@@ -131,7 +139,7 @@ var previewFile = function(){
 
             data.forEach(function (item) {
                 item.id = item.type + '_' + item.name
-				storageData[item.id] = new DataSourceEl(null, item.value);
+				storageData[item.id] = new DataSourceEl(null, item.value, item.type);
             });
 
             console.log(data);
@@ -161,7 +169,7 @@ var previewFile = function(){
 					
 					$('#' + id + i).contextMenu(menuContextConfig,{triggerOn:'contextmenu'});
 					
-					storageData[id + i] = new DataSourceEl(id, null);
+					storageData[id + i] = new DataSourceEl(id, null, storageData[id].type);
 
 					addDraggableElementEndPoint(newAgent, "tableNumber");
 					

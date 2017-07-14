@@ -67,6 +67,11 @@
               {"name": "Office","type": "string"},{"name": "Extn.","type": "number"},
 			  {"name": "Start date","type": "datetime"},{"name": "Salary","type": "number"}
             ]
+},
+{
+            "name": "A_1",
+            "type": "number",
+            "value": 234234
 }
 
 ]
