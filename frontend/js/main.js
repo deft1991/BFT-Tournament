@@ -83,7 +83,7 @@ $("#nav").on('click','.btnNav',function(e) {
 	if(id == "temp")
 		$('#' + id + i).contextMenu(menuContextConfig,{triggerOn:'contextmenu'});
 
-    addDraggableElementEndPoint(newAgent);
+    addDraggableElementEndPoint(newAgent, id);
 	
     i++;
 		
@@ -163,7 +163,7 @@ var previewFile = function(){
 					
 					storageData[id + i] = new DataSourceEl(id, null);
 
-					addDraggableElementEndPoint(newAgent);
+					addDraggableElementEndPoint(newAgent, "tableNumber");
 					
 					i++;
 			    };
