@@ -31,6 +31,23 @@ $('#myModal').on('shown.bs.modal', function (event) {
 $('#myModal').on('show.bs.modal', function (event) {
   var val = $('#elementId').val();
   var newDiv = $('<div>').attr('id', "div" + val);
+
+    var thead = $('<thead>');
+    var tr = $('<tr>');
+    var thExtn = $('<th >').attr("text", "thExtn").attr("value", "thExtn");
+
+    tr.append(thExtn);
+    thead.append(tr);
+
+    var tr2 = $('<tr>');
+    var thExtn2 = $('<input type="text" name="extn" id="extn" value="">');
+
+    tr2.append(thExtn2);
+    thead.append(tr2);
+
+
+    // newDiv.append(thead);
+
   var newTable = $('<table>').attr('id', "example").addClass("display");
   newDiv.append(newTable);
   newDiv.appendTo('#modal-body');
@@ -51,8 +68,50 @@ $('#myModal').on('show.bs.modal', function (event) {
 		$("#example").html('<tr><td align="center"><input type="text" value="'+ storageData[val].value +'" style="width:100%"></input><td></tr>');
 	  break;
   }
-  
+    newTable.append(thead);
 });
+
+    jQuery.extend($.fn.dataTableExt.afnFiltering.push(
+        function (oSettings, aData, iDataIndex) {
+            var inputFilters = [
+                {iColumn: 3, elementId: 'extn', type: 'count' }
+            ];
+            var match = true;
+            for (i = 0; i < inputFilters.length; i++) {
+                var value = jQuery('#' + inputFilters[i].elementId).val();
+                switch (inputFilters[i].type) {
+                    case 'count':
+                        if (value && match) {
+                            countFilter(value, aData[inputFilters[i].iColumn]);
+                        }
+                        break;
+                }
+            }
+
+            function countFilter(searchValue, rowValue) {
+                var compareChar = searchValue.charAt(0);
+                var compareValue = parseFloat(searchValue.substr(1, searchValue.length - 1));
+                rowValue = (jQuery(rowValue).text()) ? jQuery(rowValue).text() : rowValue;
+                match = false;
+                switch (compareChar) {
+                    case '<':
+                        if (compareValue > rowValue) match = true;
+                        break;
+                    case '>':
+                        if (compareValue < rowValue) match = true;
+                        break;
+                    case '=':
+                        if (compareValue == rowValue) match = true;
+                        break;
+                    default:
+                        if (searchValue == rowValue) match = true;
+                }
+            }
+
+            return match;
+        }
+        )
+    );
 
 $('#myModal').on('hidden.bs.modal', function () {
   
