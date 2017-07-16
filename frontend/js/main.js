@@ -70,9 +70,9 @@ $('#myModal').on('show.bs.modal', function (event) {
         }
     }
     newTable.append(thead);
-    $('#Salary').keyup(function() {
-        newTable.fnFilter($(this).val(), 0);
-    });
+    // $('#Salary').keyup(function() {
+    //     newTable.fnFilter($(this).val(), 0);
+    // });
 });
 
     function mainCompare(compareChar, compareValue, rowValue, match, searchValue) {
@@ -97,7 +97,10 @@ $('#myModal').on('show.bs.modal', function (event) {
             var inputFilters = [];
             var val = $('#elementId').val();
             for (i = 0; i < storageData[val].columns.length; i++) {
-                inputFilters[i] = {iColumn: i, elementId: storageData[val].columns[i].name.valueOf(), type: 'number'};
+                inputFilters[i] = {
+                    iColumn: i,
+                    elementId: storageData[val].columns[i].name.valueOf(),
+                    type: storageData[val].columns[i].type.valueOf()};
             }
             var match = true;
             for (i = 0; i < inputFilters.length; i++) {
@@ -106,6 +109,11 @@ $('#myModal').on('show.bs.modal', function (event) {
                     case 'number':
                         if (value && match) {
                             countFilter(value, aData[inputFilters[i].iColumn]);
+                        }
+                        break;
+                    case 'long':
+                        if (value && match) {
+                            longFilter(value, aData[inputFilters[i].iColumn]);
                         }
                         break;
                     case 'string':
@@ -125,6 +133,17 @@ $('#myModal').on('show.bs.modal', function (event) {
                 var compareChar = searchValue.charAt(0);
                 var compareValue = parseFloat(searchValue.substr(1, searchValue.length - 1));
                 rowValue = (jQuery(rowValue).text()) ? jQuery(rowValue).text() : rowValue;
+                match = false;
+                match = mainCompare(compareChar, compareValue, rowValue, match, searchValue);
+            }
+
+            function longFilter(searchValue, rowValue) {
+                var compareChar = searchValue.charAt(0);
+                var compareValue = searchValue.substr(1, searchValue.length - 1);
+                compareValue = compareValue.replace(",", "");
+                compareValue = parseFloat(compareValue);
+                rowValue = (jQuery(rowValue).text()) ? jQuery(rowValue).text() : rowValue;
+                rowValue = rowValue.replace(",", "");
                 match = false;
                 match = mainCompare(compareChar, compareValue, rowValue, match, searchValue);
             }
