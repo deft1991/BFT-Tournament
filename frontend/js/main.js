@@ -27,8 +27,32 @@ $('#myModal').on('shown.bs.modal', function (event) {
 
 });
 
+    function createFilters(val, newTable) {
+        var thead = $('<thead>');
+        for (var i = 0; i < storageData[val].columns.length; i++) {
+
+            if (storageData[val] !== undefined) {
+                var trForText = $('<tr>');
+                var trForInput = $('<tr>');
+
+                var thText = $('<th>');
+                thText.text(storageData[val].columns[i].name);
+                trForText.append(thText);
+
+                var thInput = $('<input type="text" value="">');
+                var colName = storageData[val].columns[i].name;
+                thInput.attr("id", colName);
+                // thInput.attr("align", "left");
+                trForInput.append(thInput);
+                thead.append(trForText);
+                thead.append(trForInput);
+            }
+        }
+        newTable.append(thead);
+    }
+
 // при открытии модального окна
-$('#myModal').on('show.bs.modal', function (event) {
+    $('#myModal').on('show.bs.modal', function (event) {
   var val = $('#elementId').val();
   var sData = storageData[val].source == null ? storageData[val] : storageData[storageData[val].source];
   var newDiv = $('<div>').attr('id', "div" + val);
@@ -50,26 +74,7 @@ $('#myModal').on('show.bs.modal', function (event) {
 		$("#example").html('<tr><td align="center"><input type="text" value="'+ sData.value +'" style="width:100%"></input><td></tr>');
 	  break;
   }
-    var thead = $('<thead>');
-    for (var i = 0; i < storageData[val].columns.length; i++) {
-
-        if (storageData[val] !== undefined) {
-            var tr = $('<tr>');
-            var thExtn = $('<th>').attr("value", "thExtn");
-            thExtn.text(storageData[val].columns[i].name);
-            tr.append(thExtn);
-            thead.append(tr);
-
-            var tr2 = $('<tr>');
-            var thExtn2 = $('<input type="text" value="">');
-            var colName = storageData[val].columns[i].name;
-            thExtn2.attr("id", colName);
-            thExtn2.attr("name", colName);
-            tr2.append(thExtn2);
-            thead.append(tr2);
-        }
-    }
-    newTable.append(thead);
+        createFilters(val, newTable);
     // $('#Salary').keyup(function() {
     //     newTable.fnFilter($(this).val(), 0);
     // });
