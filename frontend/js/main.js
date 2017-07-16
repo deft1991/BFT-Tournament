@@ -107,7 +107,7 @@ $('#myModal').on('show.bs.modal', function (event) {
                 {iColumn: 1, elementId: 'Position', type: 'string'},
                 {iColumn: 2, elementId: 'Office', type: 'string'},
                 {iColumn: 3, elementId: 'Extn', type: 'number'},
-                {iColumn: 4, elementId: 'Start date', type: 'datetime'},
+                {iColumn: 4, elementId: 'StartDate', type: 'datetime'},
                 {iColumn: 5, elementId: 'Salary', type: 'number'}
             ];
             var match = true;
@@ -150,10 +150,22 @@ $('#myModal').on('show.bs.modal', function (event) {
 
             function compareDateTime(searchValue, rowValue) {
                 var compareChar = searchValue.charAt(0);
-                var compareValue = searchValue.substr(1, searchValue.length - 1);
-                rowValue = (jQuery(rowValue).text()) ? jQuery(rowValue).text() : rowValue;
+                var compareValue = new Date();
+                if (compareChar == ">" || compareChar == "<") {
+                    var compareArr = searchValue.substr(1, searchValue.length - 1).split("/");
+                    compareValue.setFullYear(compareArr[0], compareArr[1] - 1, compareArr[2]);
+                }
+
+                var fromForm = rowValue.split("/");
+                var formDate = new Date();
+                formDate.setFullYear(fromForm[0], fromForm[1] - 1, fromForm[2]);
+
+                var fromInput = searchValue.split("/");
+                var seachDate = new Date();
+                seachDate.setFullYear(fromInput[0], fromInput[1] - 1, fromInput[2]);
+
                 match = false;
-                match = mainCompare(compareChar, compareValue, rowValue, match, searchValue);
+                match = mainCompare(compareChar, compareValue.getTime(), formDate.getTime(), match, seachDate.getTime());
             }
 
             return match;
