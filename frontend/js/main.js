@@ -50,10 +50,10 @@ $('#myModal').on('show.bs.modal', function (event) {
 		$("#example").html('<tr><td align="center"><input type="text" value="'+ sData.value +'" style="width:100%"></input><td></tr>');
 	  break;
   }
+    var thead = $('<thead>');
     for (var i = 0; i < storageData[val].columns.length; i++) {
 
         if (storageData[val] !== undefined) {
-            var thead = $('<thead>');
             var tr = $('<tr>');
             var thExtn = $('<th>').attr("value", "thExtn");
             thExtn.text(storageData[val].columns[i].name);
@@ -67,9 +67,9 @@ $('#myModal').on('show.bs.modal', function (event) {
             thExtn2.attr("name", colName);
             tr2.append(thExtn2);
             thead.append(tr2);
-            newTable.append(thead);
         }
     }
+    newTable.append(thead);
     $('#Salary').keyup(function() {
         newTable.fnFilter($(this).val(), 0);
     });
@@ -96,20 +96,9 @@ $('#myModal').on('show.bs.modal', function (event) {
         function (oSettings, aData, iDataIndex) {
             var inputFilters = [];
             var val = $('#elementId').val();
-            // for (i=0;i<storageData[val].columns.length;i++){
-            // var filter = [
-            //     {iColumn: i, elementId: storageData[val].columns[i].name.valueOf(), type: 'number'}
-            // ];
-            //     inputFilters[i] = filter;
-            // }
-            inputFilters = [
-                {iColumn: 0, elementId: 'Name', type: 'string'},
-                {iColumn: 1, elementId: 'Position', type: 'string'},
-                {iColumn: 2, elementId: 'Office', type: 'string'},
-                {iColumn: 3, elementId: 'Extn', type: 'number'},
-                {iColumn: 4, elementId: 'StartDate', type: 'datetime'},
-                {iColumn: 5, elementId: 'Salary', type: 'number'}
-            ];
+            for (i = 0; i < storageData[val].columns.length; i++) {
+                inputFilters[i] = {iColumn: i, elementId: storageData[val].columns[i].name.valueOf(), type: 'number'};
+            }
             var match = true;
             for (i = 0; i < inputFilters.length; i++) {
                 var value = jQuery('#' + inputFilters[i].elementId).val();
