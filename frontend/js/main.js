@@ -269,7 +269,8 @@ var previewFile = function(){
                 frag = document.createDocumentFragment(), foundNew = false;
 				
 			Object.keys(storageData).forEach(function(item, i, arr){ 
-				if(storageData[item].source === undefined){
+				if(storageData[item] !== undefined 
+					&& storageData[item].source === undefined){
 					var indexRem = data.findIndex(el=> (el.type + '_' + el.name) === item);
 		
 					if(indexRem == -1){
