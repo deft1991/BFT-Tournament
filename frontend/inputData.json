@@ -41,8 +41,8 @@
 			],
             "columns": [
               {"name": "Name","type": "string"},{"name": "Position","type": "string"},
-              {"name": "Office","type": "string"},{"name": "Extn.","type": "number"},
-			  {"name": "Start date","type": "datetime"},{"name": "Salary","type": "number"}
+              {"name": "Office","type": "string"},{"name": "Extn","type": "number"},
+			  {"name": "StartDate","type": "datetime"},{"name": "Salary","type": "long"}
             ]
 },
 {
@@ -64,8 +64,8 @@
 			],
             "columns": [
               {"name": "Position","type": "string"},
-              {"name": "Office","type": "string"},{"name": "Extn.","type": "number"},
-			  {"name": "Start date","type": "datetime"},{"name": "Salary","type": "number"}
+              {"name": "Office","type": "string"},{"name": "Extn","type": "number"},
+			  {"name": "StartDate","type": "datetime"},{"name": "Salary","type": "long"}
             ]
 },
 {
@@ -86,7 +86,7 @@
 					[ "2013/03/03", "342,000" ]
 			],
             "columns": [
-			  {"name": "Start date","type": "datetime"},{"name": "Salary","type": "number"}
+			  {"name": "StartDate","type": "datetime"},{"name": "Salary","type": "long"}
             ]
 },
 {

@@ -20,6 +20,8 @@ var menuContextConfig = [{
     }];
 	
 	
+var filtersModal = {};
+	
 var Init = function(){
 	
 //========model window===========
@@ -28,28 +30,35 @@ $('#myModal').on('shown.bs.modal', function (event) {
 });
 
     function createFilters(val, newTable) {
-        var thead = $('<thead>');
+        var thead = $('#example thead');
+		var trForInput = $('<tr>');
+		thead.append(trForInput);
+        newTable.append(thead);
         for (var i = 0; i < storageData[val].columns.length; i++) {
 
             if (storageData[val] !== undefined) {
-                var trForText = $('<tr>');
-                var trForInput = $('<tr>');
-
-                var thText = $('<th>');
-                thText.text(storageData[val].columns[i].name);
-                trForText.append(thText);
-
-                var thInput = $('<input type="text" value="">');
+				var thForInput = $('<th style="padding:2px">');
+                var thInput = $('<input type="text" value="" style="width:100%">');
                 var colName = storageData[val].columns[i].name;
+				var colType = storageData[val].columns[i].type;
                 thInput.attr("id", colName);
-                // thInput.attr("align", "left");
-                trForInput.append(thInput);
-                thead.append(trForText);
-                thead.append(trForInput);
+				thForInput.append(thInput);
+                trForInput.append(thForInput);
+				filtersModal[colName] = {index: i, type: colType};
+				$('#' + colName).keyup(function() {
+				 var indexFilter = filtersModal[$(this).attr('id')];
+				 if(indexFilter !== undefined){
+					var val = $(this).val();
+					var foundCmpSymbols = val.includes('>') || val.includes('<') || val.includes('=');
+					$("#example").dataTable().fnFilter((foundCmpSymbols ? '' : $(this).val()), indexFilter.index);
+				 }
+				});
             }
         }
-        newTable.append(thead);
+		
     }
+	
+
 
 // при открытии модального окна
     $('#myModal').on('show.bs.modal', function (event) {
@@ -69,15 +78,12 @@ $('#myModal').on('shown.bs.modal', function (event) {
 			  dataTableConf["data"] = sData.value;
 			  dataTableConf["columns"] = tableColumns;
 			  $("#example").DataTable(dataTableConf);
+			  createFilters(val, newTable);
 	  break;
 	  case 'number':
 		$("#example").html('<tr><td align="center"><input type="text" value="'+ sData.value +'" style="width:100%"></input><td></tr>');
 	  break;
   }
-        createFilters(val, newTable);
-    // $('#Salary').keyup(function() {
-    //     newTable.fnFilter($(this).val(), 0);
-    // });
 });
 
     function mainCompare(compareChar, compareValue, rowValue, match, searchValue) {
@@ -110,82 +116,65 @@ $('#myModal').on('shown.bs.modal', function (event) {
             var match = true;
             for (i = 0; i < inputFilters.length; i++) {
                 var value = jQuery('#' + inputFilters[i].elementId).val();
-                switch (inputFilters[i].type) {
-                    case 'number':
-                        if (value && match) {
-                            countFilter(value, aData[inputFilters[i].iColumn]);
-                        }
-                        break;
-                    case 'long':
-                        if (value && match) {
-                            longFilter(value, aData[inputFilters[i].iColumn]);
-                        }
-                        break;
-                    case 'string':
-                        if (value && match) {
-                            compareString(value, aData[inputFilters[i].iColumn]);
-                        }
-                        break;
-                    case 'datetime':
-                        if (value && match) {
-                            compareDateTime(value, aData[inputFilters[i].iColumn]);
-                        }
-                        break;
-                }
+				var foundCmpSymbols = value !== undefined && (value.includes('>') || value.includes('<') || value.includes('='));
+				if(foundCmpSymbols){
+					switch (inputFilters[i].type) {
+						case 'number':
+						case 'long':
+							if (value && match) {
+								countFilter(value, aData[inputFilters[i].iColumn]);
+							}
+							break;
+						case 'string':
+							if (value && match) {
+								compareString(value, aData[inputFilters[i].iColumn]);
+							}
+							break;
+						case 'datetime':
+							if (value && match) {
+								compareDateTime(value, aData[inputFilters[i].iColumn]);
+							}
+							break;
+					}
+				}
             }
 
             function countFilter(searchValue, rowValue) {
-                var compareChar = searchValue.charAt(0);
-                var compareValue = parseFloat(searchValue.substr(1, searchValue.length - 1));
-                rowValue = (jQuery(rowValue).text()) ? jQuery(rowValue).text() : rowValue;
+                var compareCharExt = searchValue.charAt(0);
+                var compareValueExt = parseFloat(searchValue.substr(1, searchValue.length - 1).replace(',', '.'));
+                var rowValueExt = parseFloat(rowValue.replace(',', '.'));
                 match = false;
-                match = mainCompare(compareChar, compareValue, rowValue, match, searchValue);
-            }
-
-            function longFilter(searchValue, rowValue) {
-                var compareChar = searchValue.charAt(0);
-                var compareValue = searchValue.substr(1, searchValue.length - 1);
-                compareValue = compareValue.replace(",", "");
-                compareValue = parseFloat(compareValue);
-                searchValue = searchValue.replace(",", "");
-                rowValue = (jQuery(rowValue).text()) ? jQuery(rowValue).text() : rowValue;
-                rowValue = rowValue.replace(",", "");
-                match = false;
-                match = mainCompare(compareChar, compareValue, rowValue, match, searchValue);
+                match = mainCompare(compareCharExt, compareValueExt, rowValueExt, match, searchValue);
             }
 
             function compareString(searchValue, rowValue) {
-                var compareChar = searchValue.charAt(0);
-                var compareValue = searchValue.substr(1, searchValue.length - 1);
-                rowValue = (jQuery(rowValue).text()) ? jQuery(rowValue).text() : rowValue;
+                var compareCharExt = searchValue.charAt(0);
+                var compareValueExt = searchValue.substr(1, searchValue.length - 1).toLowerCase();
+                var rowValueExt = rowValue.toLowerCase();
                 match = false;
-                match = mainCompare(compareChar, compareValue, rowValue, match, searchValue);
+                match = mainCompare(compareCharExt, compareValueExt, rowValueExt, match, searchValue);
             }
 
             function compareDateTime(searchValue, rowValue) {
-                var compareChar = searchValue.charAt(0);
-                var compareValue = new Date();
-                if (compareChar == ">" || compareChar == "<") {
-                    var compareArr = searchValue.substr(1, searchValue.length - 1).split("/");
-                    compareValue.setFullYear(compareArr[0], compareArr[1] - 1, compareArr[2]);
-                }
-
-                var fromForm = rowValue.split("/");
-                var formDate = new Date();
-                formDate.setFullYear(fromForm[0], fromForm[1] - 1, fromForm[2]);
-
-                var fromInput = searchValue.split("/");
-                var seachDate = new Date();
-                seachDate.setFullYear(fromInput[0], fromInput[1] - 1, fromInput[2]);
+                var compareCharExt = searchValue.charAt(0);
+				var searchValueExt = searchValue.substr(1, searchValue.length - 1);
+                var compareValueExt = normalizeDate(searchValueExt === '' ? '1900/01/01' : searchValueExt);
+				var rowValueExt = normalizeDate(rowValue === '' ? '1900/01/01' : rowValue);
 
                 match = false;
-                match = mainCompare(compareChar, compareValue.getTime(), formDate.getTime(), match, seachDate.getTime());
+                match = mainCompare(compareCharExt, compareValueExt, rowValueExt, match, rowValueExt);
             }
 
             return match;
         }
         )
     );
+	
+var normalizeDate = function(dateString) {
+  var date = new Date(dateString);
+  var normalized = date.getFullYear() + '' + (("0" + (date.getMonth() + 1)).slice(-2)) + '' + ("0" + date.getDate()).slice(-2);
+  return normalized;
+};
 
 $('#myModal').on('hidden.bs.modal', function () {
   
