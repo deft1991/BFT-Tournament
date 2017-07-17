@@ -25,26 +25,27 @@ var filtersModal = {};
 var getTableFilter = function(){
 	var id = $('#elementId').val();		 
 	var filters = [];
-	Object.keys(storageData[id].filter).forEach(function(key, i){
-		var item = storageData[id].filter[key];
-		var val = $('#' + key).val();
-		var foundCmpSymbols = val.includes('>') || val.includes('<') || val.includes('=');
-		var ops = foundCmpSymbols ? val.substr(0, 1) : '';
-		val = foundCmpSymbols ? val.substr(1, val.length - 1) : val;
-		if(item !== undefined){
-			item.value = (item.type === 'datetime' ? normalizeDate(val) : val);
-			item.operation = ops;
-			if(val !== ''){
-				if(item.operation !== ''){
-					
-					filters.push(id + '.' + key + item.operation + ((item.type === 'string' || item.type === 'datetime') ? '"' + item.value + '"': item.value));
-				}else{
-					filters.push('CAST(' + id + '.' + key  + ' as varchar) like "%'+ item.value + '%"');
+	if(storageData[id] !== undefined){
+		Object.keys(storageData[id].filter).forEach(function(key, i){
+			var item = storageData[id].filter[key];
+			var val = $('#' + key).val();
+			var foundCmpSymbols = val.includes('>') || val.includes('<') || val.includes('=');
+			var ops = foundCmpSymbols ? val.substr(0, 1) : '';
+			val = foundCmpSymbols ? val.substr(1, val.length - 1) : val;
+			if(item !== undefined){
+				item.value = (item.type === 'datetime' ? normalizeDate(val) : val);
+				item.operation = ops;
+				if(val !== ''){
+					if(item.operation !== ''){
+						
+						filters.push(id + '.' + key + item.operation + ((item.type === 'string' || item.type === 'datetime') ? '"' + item.value + '"': item.value));
+					}else{
+						filters.push('CAST(' + id + '.' + key  + ' as varchar) like "%'+ item.value + '%"');
+					}
 				}
-			}
-		}		
-	});
-	
+			}		
+		});
+	}
 	alert('[' + filters.join(' AND ') + ']');
 };
 
@@ -109,26 +110,29 @@ $('#myModal').on('shown.bs.modal', function (event) {
 // при открытии модального окна
     $('#myModal').on('show.bs.modal', function (event) {
   var val = $('#elementId').val();
-  var sData = storageData[val].source == null ? storageData[val] : storageData[storageData[val].source];
+  
   var newDiv = $('<div>').attr('id', "div" + val);
 
   var newTable = $('<table>').attr('id', "example").addClass("display");
   newDiv.append(newTable);
   newDiv.appendTo('#modal-body');
   $('#example')[0].style.width = "100%";
-  switch(storageData[val].type){
-	  case 'table':
-			  function newTitle(x){var el = {title: x}; return el;}
-			  var tableColumns = sData.columns.map(c=>newTitle(c.name));
-			  var dataTableConf = {};
-			  dataTableConf["data"] = sData.value;
-			  dataTableConf["columns"] = tableColumns;
-			  $("#example").DataTable(dataTableConf);
-			  createFilters(val, newTable);
-	  break;
-	  case 'number':
-		$("#example").html('<tr><td align="center"><input type="text" value="'+ sData.value +'" style="width:100%"></input><td></tr>');
-	  break;
+  if(storageData[val] !== undefined){//временное условие, для открытия temp таблиц
+	  var sData = storageData[val].source == undefined ? storageData[val] : storageData[storageData[val].source];
+	  switch(storageData[val].type){
+		  case 'table':
+				  function newTitle(x){var el = {title: x}; return el;}
+				  var tableColumns = sData.columns.map(c=>newTitle(c.name));
+				  var dataTableConf = {};
+				  dataTableConf["data"] = sData.value;
+				  dataTableConf["columns"] = tableColumns;
+				  $("#example").DataTable(dataTableConf);
+				  createFilters(val, newTable);
+		  break;
+		  case 'number':
+			$("#example").html('<tr><td align="center"><input type="text" value="'+ sData.value +'" style="width:100%"></input><td></tr>');
+		  break;
+	  }
   }
 });
 
