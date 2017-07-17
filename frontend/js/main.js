@@ -21,8 +21,45 @@ var menuContextConfig = [{
 	
 	
 var filtersModal = {};
+
+var getTableFilter = function(){
+	var id = $('#elementId').val();		 
+	var filters = [];
+	Object.keys(storageData[id].filter).forEach(function(key, i){
+		var item = storageData[id].filter[key];
+		var val = $('#' + key).val();
+		var foundCmpSymbols = val.includes('>') || val.includes('<') || val.includes('=');
+		var ops = foundCmpSymbols ? val.substr(0, 1) : '';
+		val = foundCmpSymbols ? val.substr(1, val.length - 1) : val;
+		if(item !== undefined){
+			item.value = (item.type === 'datetime' ? normalizeDate(val) : val);
+			item.operation = ops;
+			if(val !== ''){
+				if(item.operation !== ''){
+					
+					filters.push(id + '.' + key + item.operation + ((item.type === 'string' || item.type === 'datetime') ? '"' + item.value + '"': item.value));
+				}else{
+					filters.push('CAST(' + id + '.' + key  + ' as varchar) like "%'+ item.value + '%"');
+				}
+			}
+		}		
+	});
+	
+	alert('[' + filters.join(' AND ') + ']');
+};
+
+var normalizeDate = function(dateString) {
+  if(dateString === '')
+	  return ''
+  var date = new Date(dateString);
+  var normalized = date.getFullYear() + '' + (("0" + (date.getMonth() + 1)).slice(-2)) + '' + ("0" + date.getDate()).slice(-2);
+  return normalized;
+};
 	
 var Init = function(){
+	
+$('#filterAccept').click(getTableFilter);
+
 	
 //========model window===========
 $('#myModal').on('shown.bs.modal', function (event) {
@@ -37,29 +74,38 @@ $('#myModal').on('shown.bs.modal', function (event) {
         for (var i = 0; i < storageData[val].columns.length; i++) {
 
             if (storageData[val] !== undefined) {
-				var thForInput = $('<th style="padding:2px">');
+				var thForInput = $('<th id = "thFilters" style="padding:2px">');
                 var thInput = $('<input type="text" value="" style="width:100%">');
                 var colName = storageData[val].columns[i].name;
 				var colType = storageData[val].columns[i].type;
                 thInput.attr("id", colName);
 				thForInput.append(thInput);
                 trForInput.append(thForInput);
-				filtersModal[colName] = {index: i, type: colType};
+				if(storageData[val].filter === undefined 
+					|| storageData[val].filter === {} 
+					|| storageData[val].filter[colName] === undefined){
+					storageData[val].filter[colName] = {index: i, type: colType, value: '', operation: ''};
+				}else{
+					var newValue = storageData[val].filter[colName].operation + storageData[val].filter[colName].value;
+					thInput.val(newValue);
+					$("#example").dataTable().fnFilter((storageData[val].filter[colName].operation !== '' ? '' : newValue), storageData[val].filter[colName].index);
+				}
 				$('#' + colName).keyup(function() {
-				 var indexFilter = filtersModal[$(this).attr('id')];
+				 var valEl = $('#elementId').val();
+				 var indexFilter = storageData[valEl].filter[$(this).attr('id')];
 				 if(indexFilter !== undefined){
 					var val = $(this).val();
 					var foundCmpSymbols = val.includes('>') || val.includes('<') || val.includes('=');
+					//indexFilter.value = foundCmpSymbols ? val.substr(1, val.length - 1) : val;
+					//indexFilter.operation = foundCmpSymbols ? val[0] : '';
 					$("#example").dataTable().fnFilter((foundCmpSymbols ? '' : $(this).val()), indexFilter.index);
-				 }
+				 } 
 				});
             }
         }
 		
     }
 	
-
-
 // при открытии модального окна
     $('#myModal').on('show.bs.modal', function (event) {
   var val = $('#elementId').val();
@@ -170,11 +216,6 @@ $('#myModal').on('shown.bs.modal', function (event) {
         )
     );
 	
-var normalizeDate = function(dateString) {
-  var date = new Date(dateString);
-  var normalized = date.getFullYear() + '' + (("0" + (date.getMonth() + 1)).slice(-2)) + '' + ("0" + date.getDate()).slice(-2);
-  return normalized;
-};
 
 $('#myModal').on('hidden.bs.modal', function () {
   
@@ -237,11 +278,12 @@ $("#nav").on('click','.btnNav',function(e) {
 
 };
 
-function DataSourceEl(source, value, type, columns){
+function DataSourceEl(source, value, type, columns, filter){
 	this.source = source;
 	this.value = value;
 	this.type = type;
 	this.columns = columns;
+	this.filter = filter;
 }	
 
 var storageData = {};
@@ -272,9 +314,29 @@ var previewFile = function(){
 			
 			    item.id = item.type + '_' + item.name;
 				
+				var filter = {};
+				if(item.type === 'table' && item.filter !== undefined){
+					item.filter.forEach(function(elFilter){
+						var fakeElFilter = {index: -1, type: '', value: '', operation: ''};
+						
+						var colIndex = item.columns.findIndex(function(e, i, arr){return e.name === elFilter.name});
+						if(colIndex > -1){
+							fakeElFilter.type = item.columns[colIndex].type;
+							fakeElFilter.index = colIndex;
+							fakeElFilter.value = elFilter.value;
+							fakeElFilter.operation = elFilter.operation !== undefined ? elFilter.operation : '';
+							filter[elFilter.name] = fakeElFilter;
+						}else{
+							alert('Некорректный фильтр у таблицы' + item.id);
+						}
+							
+						
+					});
+				}
+				
 				//если нет элемента - создадим
 				if(storageData[item.id] === undefined){
-				    storageData[item.id] = new DataSourceEl(undefined, item.value, item.type, item.columns);
+				    storageData[item.id] = new DataSourceEl(undefined, item.value, item.type, item.columns, filter);
 					var el = document.createElement("div");
 					el.id = item.id;
 					el.className = "draggable tableNumber";
@@ -295,7 +357,8 @@ var previewFile = function(){
 						
 						$('#' + id + i).contextMenu(menuContextConfig,{triggerOn:'contextmenu'});
 						
-						storageData[id + i] = new DataSourceEl(id, undefined, storageData[id].type, storageData[id].columns);
+						var copyFilter = JSON.parse(JSON.stringify(storageData[id].filter));
+						storageData[id + i] = new DataSourceEl(id, undefined, storageData[id].type, storageData[id].columns, copyFilter);
 
 						addDraggableElementEndPoint(newAgent, "tableNumber");
 						
@@ -307,7 +370,7 @@ var previewFile = function(){
 					foundNew = true;
 				}else{
 					//обновим информацию о элементе
-					storageData[item.id] = new DataSourceEl(undefined, item.value, item.type, item.columns);
+					storageData[item.id] = new DataSourceEl(undefined, item.value, item.type, item.columns, filter);
 				}
 				
             });
