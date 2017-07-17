@@ -147,6 +147,7 @@ $('#myModal').on('shown.bs.modal', function (event) {
                 var compareValue = searchValue.substr(1, searchValue.length - 1);
                 compareValue = compareValue.replace(",", "");
                 compareValue = parseFloat(compareValue);
+                searchValue = searchValue.replace(",", "");
                 rowValue = (jQuery(rowValue).text()) ? jQuery(rowValue).text() : rowValue;
                 rowValue = rowValue.replace(",", "");
                 match = false;
