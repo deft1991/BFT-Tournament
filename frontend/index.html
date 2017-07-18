@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="utf-8">
 	<script src="http://cdnjs.cloudflare.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
@@ -9,6 +10,7 @@
 	<script src="js/bootstrap/js/bootstrap.js"></script>
 	<script src="js/contextMenu/contextMenu.js"></script>
 	<script src="js/plumb.js"></script>
+	<script src="js/FileSaver.js"></script>
 	<script src="js/main.js"></script>
 	<link href="css/main.css"  rel="stylesheet" type="text/css">
 	<link href="js/bootstrap/css/bootstrap.css" rel="stylesheet" type="text/css"/>
@@ -97,3 +99,49 @@
 </div>
 </body>
 </html>
+<script src="js/FileSaver.js"></script>
+<script>
+    var serviceURL = "http://localhost:6060/servletexam/mainServlet?action=start_service";
+
+    $('#save').click(function() {
+        getPaths();
+    });
+
+    function getPaths() {
+        console.log('display paths');
+        var name = JSON.stringify(items);
+        console.log(name);
+        $.ajax({
+            url: serviceURL,
+            type: 'GET',
+            crossDomain: true,
+            dataType: "json", // data type get back from server
+            data: {"data": name}, //data sent to server
+            success: function (data, textStatus, jqXHR) {
+                var data = $(data);
+                $('#id').append(data);
+
+                alert('Path created successfully. SessionID = ' + data[0] );
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                alert('Path Finder : ' + textStatus);
+            }
+        });
+    }
+
+
+    var items = [{
+        "name": "table_12",
+        "datatype": "table",
+        "value": [
+            [ "Tiger Nixon", "System Architect", "Edinburgh", "5421", "2011-04-25", "320.800" ],
+            [ "Garrett Winters", "Accountant", "Tokyo", "8422", "2011-07-25", "170.750" ]
+        ],
+        "columns": [
+            {"name": "Name","type": "string"},{"name": "Position","type": "string"},
+            {"name": "Office","type": "string"},{"name": "Extn","type": "long"},
+            {"name": "StartDate","type": "date"},{"name": "Salary","type": "double"}
+        ]
+        }];
+
+</script>

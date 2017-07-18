@@ -298,7 +298,7 @@ var previewFile = function(){
 
         reader.addEventListener("load", function () {
             console.log(reader.result);
-            var data = JSON.parse(reader.result);
+            var data = JSON.stringify(reader.result);
 
             var toolBar = document.getElementById('toolBar'),
                 frag = document.createDocumentFragment(), foundNew = false;
