@@ -1,13 +1,9 @@
 [
 {
             "name": "table_5",
+			"type": "table",
             "source": "table_1",
-			"target": "add_1",
-			"position": {
-				"dx": "130px",
-				"dy": "100px"
-			},
-			"isWorkZone":true
+			"isWorkZone": true
 },
 {
             "name": "table_1",
@@ -114,51 +110,5 @@
             "name": "B_1",
             "type": "number",
             "value": 21314.545
-},
-{
-            "name": "add_1",
-            "type": "add",
-			"position": {
-				"dx": "300px",
-				"dy": "100px"
-			},
-			"isWorkZone":true
-},
-{
-            "name": "sub_1",
-            "type": "sub",
-			"position": {
-				"dx": "200px",
-				"dy": "10px"
-			},
-			"isWorkZone":true
-},
-{
-            "name": "mul_1",
-            "type": "mul",
-			"target": "table_5",
-			"position": {
-				"dx": "10px",
-				"dy": "100px"
-			},
-			"isWorkZone":true
-},
-{
-            "name": "div_1",
-            "type": "div",
-						"position": {
-				"dx": "100px",
-				"dy": "10px"
-			},
-			"isWorkZone":true
-},
-{
-            "name": "temp_5",
-            "type": "temp",
-			"position": {
-				"dx": "200px",
-				"dy": "100px"
-			},
-			"isWorkZone":true
 }
 ]

@@ -23,30 +23,43 @@ var menuContextConfig = [{
 var filtersModal = {};
 
 var getTableFilter = function(){
-	var id = $('#elementId').val();		 
-	var filters = [];
-	if(storageData[id] !== undefined){
-		Object.keys(storageData[id].filter).forEach(function(key, i){
-			var item = storageData[id].filter[key];
-			var val = $('#' + key).val();
-			var foundCmpSymbols = val.includes('>') || val.includes('<') || val.includes('=');
-			var ops = foundCmpSymbols ? val.substr(0, 1) : '';
-			val = foundCmpSymbols ? val.substr(1, val.length - 1) : val;
-			if(item !== undefined){
-				item.value = (item.type === 'datetime' ? normalizeDate(val) : val);
-				item.operation = ops;
-				if(val !== ''){
-					if(item.operation !== ''){
-						
-						filters.push(id + '.' + key + item.operation + ((item.type === 'string' || item.type === 'datetime') ? '"' + item.value + '"': item.value));
-					}else{
-						filters.push('CAST(' + id + '.' + key  + ' as varchar) like "%'+ item.value + '%"');
-					}
-				}
-			}		
-		});
+	var id = $('#elementId').val();
+	if(storageData[id] !== undefined){	
+		switch(storageData[id].type){
+			case "table":
+			case "temp":
+			var filters = [];
+			if(storageData[id].filter !== undefined){
+				Object.keys(storageData[id].filter).forEach(function(key, i){
+					var item = storageData[id].filter[key];
+					if(item !== undefined){
+						var val = $('#' + key).val();
+						val = val === undefined ? '' : val;
+						var foundCmpSymbols = val.includes('>') || val.includes('<') || val.includes('=');
+						var ops = foundCmpSymbols ? val.substr(0, 1) : '';
+						val = foundCmpSymbols ? val.substr(1, val.length - 1) : val;
+						item.value = (item.type === 'datetime' ? normalizeDate(val) : val);
+						item.operation = ops;
+						if(val !== ''){
+							if(item.operation !== ''){
+								
+								filters.push(id + '.' + key + item.operation + ((item.type === 'string' || item.type === 'datetime') ? '"' + item.value + '"': item.value));
+							}else{
+								filters.push('CAST(' + id + '.' + key  + ' as varchar) like "%'+ item.value + '%"');
+							}
+						}
+					}		
+				});
+			}
+			alert('[' + filters.join(' AND ') + ']');
+			break;
+			case "number":
+			    var sData = storageData[id].source == undefined ? storageData[id] : storageData[storageData[id].source];
+				sData.value = $('#input_' + sData.name).val();
+			break;
+		}
 	}
-	alert('[' + filters.join(' AND ') + ']');
+	$('#myModal').modal('hide');
 };
 
 var normalizeDate = function(dateString) {
@@ -56,10 +69,39 @@ var normalizeDate = function(dateString) {
   var normalized = date.getFullYear() + '' + (("0" + (date.getMonth() + 1)).slice(-2)) + '' + ("0" + date.getDate()).slice(-2);
   return normalized;
 };
+//======================SAVE==================================
+var saveCurrentState = function(){
+	var exportData = [];
+	Object.keys(storageData).forEach(function(key){
+		var clNode = JSON.parse(JSON.stringify(storageData[key]));
+		clNode["position"] = {dx: $('#' + key).position().left,dy:$('#' + key).position().top};
+		
+		var indexRem = calcPath.findIndex(el=> el.source === key);
+		if(indexRem > -1){
+			clNode["isWorkZone"] = true;
+			clNode["target"] = calcPath[indexRem].target;
+		}else{
+			clNode["isWorkZone"] = false;
+		}
+		
+		exportData.push(clNode);
+	});
+	
+	var blob = new Blob([JSON.stringify(exportData)], {type: "application/json"});
+
+	var saveAs = window.saveAs;
+	saveAs(blob, 'exportSchema_' + (new Date().toLocaleString() +'.json');
+};
+
+
+
+//===============================================================
 	
 var Init = function(){
 	
 $('#filterAccept').click(getTableFilter);
+
+$('#save').click(saveCurrentState);
 
 	
 //========model window===========
@@ -106,7 +148,7 @@ $('#myModal').on('shown.bs.modal', function (event) {
         }
 		
     }
-	
+
 // при открытии модального окна
     $('#myModal').on('show.bs.modal', function (event) {
   var val = $('#elementId').val();
@@ -119,18 +161,19 @@ $('#myModal').on('shown.bs.modal', function (event) {
   $('#example')[0].style.width = "100%";
   if(storageData[val] !== undefined){//временное условие, для открытия temp таблиц
 	  var sData = storageData[val].source == undefined ? storageData[val] : storageData[storageData[val].source];
-	  switch(storageData[val].type){
+	  switch(sData.type){
 		  case 'table':
 				  function newTitle(x){var el = {title: x}; return el;}
 				  var tableColumns = sData.columns.map(c=>newTitle(c.name));
 				  var dataTableConf = {};
 				  dataTableConf["data"] = sData.value;
 				  dataTableConf["columns"] = tableColumns;
+				  
 				  $("#example").DataTable(dataTableConf);
 				  createFilters(val, newTable);
 		  break;
 		  case 'number':
-			$("#example").html('<tr><td align="center"><input type="text" value="'+ sData.value +'" style="width:100%"></input><td></tr>');
+			$("#example").html('<tr><td align="center"><input id="input_'+ sData.name +'" type="text" value="'+ sData.value +'" style="width:100%"></input><td></tr>');
 		  break;
 	  }
   }
@@ -240,25 +283,29 @@ $("#nav").on('click','.btnNav',function(e) {
 	cl["div"] = "glyphicon glyphicon-italic";
 	cl["temp"] = "glyphicon glyphicon-search";
 	
-	var newAgent = $('<div>').attr('id', id + i).addClass('project').addClass('absoluteEl');
-	if(id == "temp")
-		newAgent.addClass("tempOps");
+	var newAgent = $('<div>').attr('id', id + i).addClass('absoluteEl');
+	if(id == "temp"){
+		newAgent.addClass("tempOps").addClass("tableNumber");
+	}else{
+		newAgent.addClass("project");
+	}
 	var newSpan = $('<span>').attr('id', "span" + id + i).addClass(cl[id]);
 	newAgent.text(id + i);
 	$('#workzone').append(newAgent);
 	$('#' + id + i).append("<br>");
 	$('#' + id + i).append(newSpan);
 	
-	if(id == "temp")
+	if(id == "temp"){
 		$('#' + id + i).contextMenu(menuContextConfig,{triggerOn:'contextmenu'});
+	}
+	storageData[id + i] = new DataSourceEl(id + i, undefined, id, undefined, undefined, undefined);
 
     addDraggableElementEndPoint(newAgent, id);
 	
     i++;
 		
   });
-  
-  
+
   $("#workzone").on('click','.absoluteEl',function(e) {
   
     var id = e.currentTarget.getAttribute("id");
@@ -282,12 +329,15 @@ $("#nav").on('click','.btnNav',function(e) {
 
 };
 
-function DataSourceEl(source, value, type, columns, filter){
+function DataSourceEl(name, source, type, columns, value, filter, target, isWorkZone){
+	this.name = name;
 	this.source = source;
-	this.value = value;
 	this.type = type;
 	this.columns = columns;
+	this.value = value;
 	this.filter = filter;
+	this.target = target;
+	this.isWorkZone = isWorkZone;
 }	
 
 var storageData = {};
@@ -298,15 +348,11 @@ var previewFile = function(){
 
         reader.addEventListener("load", function () {
             console.log(reader.result);
-            var data = JSON.stringify(reader.result);
-
-            var toolBar = document.getElementById('toolBar'),
-                frag = document.createDocumentFragment(), foundNew = false;
+            var data = JSON.parse(reader.result);
 				
 			Object.keys(storageData).forEach(function(item, i, arr){ 
-				if(storageData[item] !== undefined 
-					&& storageData[item].source === undefined){
-					var indexRem = data.findIndex(el=> (el.type + '_' + el.name) === item);
+				if(storageData[item] !== undefined){
+					var indexRem = data.findIndex(el=> el.name === item);
 		
 					if(indexRem == -1){
 						deleteEndPointsByElement($('#'+item));
@@ -314,76 +360,72 @@ var previewFile = function(){
 				}				
 			});
 
-            data.forEach(function (item) {
-			
-			    item.id = item.type + '_' + item.name;
-				
-				var filter = {};
-				if(item.type === 'table' && item.filter !== undefined){
-					item.filter.forEach(function(elFilter){
-						var fakeElFilter = {index: -1, type: '', value: '', operation: ''};
-						
-						var colIndex = item.columns.findIndex(function(e, i, arr){return e.name === elFilter.name});
-						if(colIndex > -1){
-							fakeElFilter.type = item.columns[colIndex].type;
-							fakeElFilter.index = colIndex;
-							fakeElFilter.value = elFilter.value;
-							fakeElFilter.operation = elFilter.operation !== undefined ? elFilter.operation : '';
-							filter[elFilter.name] = fakeElFilter;
-						}else{
-							alert('Некорректный фильтр у таблицы' + item.id);
-						}
-							
-						
-					});
-				}
-				
-				//если нет элемента - создадим
-				if(storageData[item.id] === undefined){
-				    storageData[item.id] = new DataSourceEl(undefined, item.value, item.type, item.columns, filter);
-					var el = document.createElement("div");
-					el.id = item.id;
-					el.className = "draggable tableNumber";
-					
-					el.onclick = function(e) {
-						var id = e.currentTarget.getAttribute("id");
-						var cl = "";
-						if(id.includes("table")) cl = "glyphicon glyphicon-text-width";
-						if(id.includes("number")) cl = "glyphicon glyphicon-bold";
-						
-						var newAgent = $('<div>').attr('id', id + i).addClass('tableNumber').addClass('absoluteEl');
-						var newSpan = $('<span>').attr('id', "span" + id + i).addClass(cl);
-						newAgent.text(id);
-						
-						$('#workzone').append(newAgent);
-						$('#' + id + i).append("<br>");
-						$('#' + id + i).append(newSpan);
-						
-						$('#' + id + i).contextMenu(menuContextConfig,{triggerOn:'contextmenu'});
-						
-						var copyFilter = JSON.parse(JSON.stringify(storageData[id].filter));
-						storageData[id + i] = new DataSourceEl(id, undefined, storageData[id].type, storageData[id].columns, copyFilter);
-
-						addDraggableElementEndPoint(newAgent, "tableNumber");
-						
-						i++;
-					};
-					var txt = document.createTextNode(item.name + '(' + item.type + ')');
-					el.appendChild(txt);
-					frag.appendChild(el);
-					foundNew = true;
+            data.sort(function(a,b){//сначала обработаем источники
+				if(a.source !== undefined && b.source === undefined){
+					return 1;
 				}else{
-					//обновим информацию о элементе
-					storageData[item.id] = new DataSourceEl(undefined, item.value, item.type, item.columns, filter);
+					return -1;
 				}
-				
-            });
-			if(foundNew)
-				toolBar.appendChild(frag);
+			}).forEach(function (item) {
 			
-			$('#toolBar').find('.tableNumber').each(function( i, el ) {
-				$("#" + el.getAttribute("id")).contextMenu(menuContextConfig,{triggerOn:'contextmenu'});
+					var type = item.source !== undefined && storageData[item.source] !== undefined ? storageData[item.source].type : item.type;
+					switch(type){
+						case "table":
+						case "number":
+						case "temp":
+							var filter = {};
+							if(item.filter !== undefined || item.source !== undefined){
+								if(item.source !== undefined){
+									filter = JSON.parse(JSON.stringify(storageData[item.source].filter));
+								}else{
+									Object.keys(item.filter).forEach(function(elFilter){
+										var fakeElFilter = {index: -1, type: '', value: '', operation: ''};
+										
+										var colIndex = item.columns.findIndex(function(e, i, arr){return e.name === elFilter});
+										if(colIndex > -1){
+											fakeElFilter.type = item.columns[colIndex].type;
+											fakeElFilter.index = colIndex;
+											fakeElFilter.value = item.filter[elFilter].value;
+											fakeElFilter.operation = item.filter[elFilter].operation !== undefined ? item.filter[elFilter].operation : '';
+											filter[elFilter] = fakeElFilter;
+										}else{
+											alert('Некорректный фильтр у таблицы' + item.name);
+										}
+									});
+								}
+							}
+							//если нет элемента - создадим
+							if(storageData[item.name] === undefined){
+								createTempTableNumberEl(item, filter);
+							}else{
+								//обновим информацию о элементе
+								storageData[item.name] = new DataSourceEl(item.name, undefined, item.type, item.columns, item.value, filter, item.target, item.isWorkZone);
+							}
+						break;
+						case "add":
+						case "sub":
+						case "div":
+						case "mul":
+								createOperationEl(item);
+						break;
+						default:
+							alert('Неизвестный тип данных!');
+						break;
+					}
+	
+            });
+			//устанавливаем связи
+			Object.keys(storageData).forEach(function(key){
+				if(storageData[key].target !== undefined 
+				&& storageData[key].isWorkZone){
+					
+					var endpointSource = jsPlumb.getEndpoints($('#' + key)).find(function(el, i, arr){return el.isSource;});
+					var endpointTarget = jsPlumb.getEndpoints($('#' + storageData[key].target)).find(function(el, i, arr){return el.isTarget;});
+					
+					jsPlumb.connect({source: endpointSource, target: endpointTarget});
+				}
 			});
+
 			$('input[type=file]').val('');
 
         }, false);
@@ -392,3 +434,102 @@ var previewFile = function(){
             reader.readAsText(file);
         }
     };
+	
+  
+//=========создание элемента===========
+var arrIconsElement = {};
+	arrIconsElement["add"] = "glyphicon glyphicon-plus";
+	arrIconsElement["sub"] = "glyphicon glyphicon-minus";
+	arrIconsElement["mul"] = "glyphicon glyphicon-remove";
+	arrIconsElement["div"] = "glyphicon glyphicon-italic";
+	arrIconsElement["temp"] = "glyphicon glyphicon-search";
+	arrIconsElement["table"] = "glyphicon glyphicon-text-width";
+	arrIconsElement["number"] = "glyphicon glyphicon-bold";
+	
+	
+var createOperationEl = function(el, onWorkZone, filter){
+	var id = el.name;
+	if(document.getElementById(id) === undefined 
+		|| document.getElementById(id) === null){
+		var newDiv = document.createElement("div");
+		newDiv.id = id;
+		
+		var newSpan = $('<span>').attr('id', "span" + id).addClass(arrIconsElement[el.type]);
+		newDiv.className = "project absoluteEl"
+		$('#workzone').append(newDiv);
+		$('#' + id).append("<br>");
+		$('#' + id).append(newSpan);
+		$('#' + id).css({top: el.position.dy, left: el.position.dx}); 
+		storageData[id] = new DataSourceEl(id, undefined, el.type, undefined, undefined, undefined, el.target, el.isWorkZone);
+		addDraggableElementEndPoint($('#' + id), el.type);
+	}
+};
+
+var createTempTableNumberEl = function(el, filter){
+	var id = el.name;
+	var type  = el.source !== undefined && storageData[el.source] !== undefined ? storageData[el.source].type : el.type;
+	var newDiv = document.createElement("div");
+	newDiv.id = id;
+	
+	
+	var newSpan = $('<span>').attr('id', "span" + id).addClass(arrIconsElement[el.type]);
+					
+	if(el.isWorkZone){
+		newDiv.className = " tableNumber absoluteEl" + (type === 'temp' ? " tempOps" : "");
+		var dataParent = storageData[el.source];
+		if(dataParent !== undefined){
+			var txt = document.createTextNode(el.name + '(' + dataParent.type + ')');
+			newDiv.appendChild(txt);
+			var copyFilter = JSON.parse(JSON.stringify(dataParent.filter));
+			storageData[id] = new DataSourceEl(id, el.source, el.type, dataParent.columns, dataParent.value, copyFilter, el.target, el.isWorkZone);
+		}else{
+			var txt = document.createTextNode(el.name + '(' + el.type + ')');
+			newDiv.appendChild(txt);
+			storageData[id] = new DataSourceEl(id, undefined, el.type, el.columns, el.value, filter, el.target, el.isWorkZone);
+		}
+		$('#workzone').append(newDiv);
+		if(el.position !== undefined){
+			$('#' + id).css({top: el.position.dy, left: el.position.dx}); 
+		}
+		addDraggableElementEndPoint($('#' + id), type);
+	}else{
+		newDiv.className = "draggable tableNumber";
+		var txt = document.createTextNode(el.name + '(' + type + ')');
+		newDiv.appendChild(txt);
+		$('#toolBar').append(newDiv);
+		newDiv.onclick = function(e) {
+			
+			var id = e.currentTarget.getAttribute("id");
+			var idI = id + i;
+			i++;
+			var newAgentExt = $('<div>').attr('id', idI).addClass('tableNumber').addClass('absoluteEl');
+			var newSpanExt = $('<span>').attr('id', "span" + idI).addClass(arrIconsElement[storageData[id].type]);
+			newAgentExt.text(idI);
+							
+			$('#workzone').append(newAgentExt);
+			$('#' + idI).append("<br>");
+			$('#' + idI).append(newSpanExt);
+							
+			var copyFilter = JSON.parse(JSON.stringify(storageData[id].filter));
+			var copyValue = JSON.parse(JSON.stringify(storageData[id].value));
+			storageData[idI] = new DataSourceEl(idI, (storageData[id].type === 'number' ? undefined: id), storageData[id].type, storageData[id].columns, copyValue, copyFilter, undefined, true);
+
+			addDraggableElementEndPoint($('#' + idI), storageData[id].type);
+			$('#' + idI).contextMenu(menuContextConfig,{triggerOn:'contextmenu'});
+		};
+		var dataParent = storageData[el.source];
+		if(dataParent !== undefined){
+			var copyFilter = JSON.parse(JSON.stringify(dataParent.filter));
+			storageData[id] = new DataSourceEl(id, el.source, el.type, dataParent.columns, dataParent.value, copyFilter, el.target, false);
+		}else{
+			storageData[id] = new DataSourceEl(id, undefined, el.type, el.columns, el.value, filter, el.target, false);
+		}
+	}
+	
+	$('#' + id).append("<br>");
+	$('#' + id).append(newSpan);
+	//добавили контекстное меню
+	$('#' + id).contextMenu(menuContextConfig,{triggerOn:'contextmenu'});
+};
+  
+//=====================================

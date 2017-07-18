@@ -15,7 +15,6 @@ jsPlumb.ready(function() {
       
    
   jsPlumb.bind("connection", function(info) {
-	  
 	var err = false;
     var arr = [];
 	createPath(arr, info.targetId, err);
@@ -32,9 +31,10 @@ jsPlumb.ready(function() {
 	
 	var target = $('#' + info.targetId);
 	var source = $('#' + info.sourceId);
-	var tempOps = target.hasClass("tempOps") && source.hasClass("tempOps") || (!target.hasClass("tempOps") && !source.hasClass("tempOps"));
-	if((target.hasClass("project") && source.hasClass("project") && tempOps) 
-		|| (target.hasClass("tableNumber") && source.hasClass("tableNumber"))){
+	
+	var tempOps = (target.hasClass("tempOps") && !source.hasClass("tempOps")) ||(!target.hasClass("tempOps") && source.hasClass("tempOps"));
+	if(!tempOps && ((target.hasClass("project") && source.hasClass("project")) 
+		|| (target.hasClass("tableNumber") && source.hasClass("tableNumber")))){
 		jsPlumb.detach(info.connection);
 	}
 	
@@ -155,7 +155,8 @@ var createFormulsList = function(){
 							resArr.push('->');
 							resArr.push(element);
 						break;
-						case 'tableNumber':
+						case 'table':
+						case 'number':
 							resArr.push(element);
 						break;
 					}
