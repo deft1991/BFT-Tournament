@@ -90,7 +90,7 @@ var saveCurrentState = function(){
 	var blob = new Blob([JSON.stringify(exportData)], {type: "application/json"});
 
 	var saveAs = window.saveAs;
-	saveAs(blob, 'exportSchema_' + (new Date().toLocaleString() +'.json');
+	saveAs(blob, 'exportSchema_' + (new Date().toLocaleString() +'.json'));
 };
 
 
@@ -504,7 +504,7 @@ var createTempTableNumberEl = function(el, filter){
 			i++;
 			var newAgentExt = $('<div>').attr('id', idI).addClass('tableNumber').addClass('absoluteEl');
 			var newSpanExt = $('<span>').attr('id', "span" + idI).addClass(arrIconsElement[storageData[id].type]);
-			newAgentExt.text(idI);
+			newAgentExt.text(id);
 							
 			$('#workzone').append(newAgentExt);
 			$('#' + idI).append("<br>");
@@ -512,7 +512,7 @@ var createTempTableNumberEl = function(el, filter){
 							
 			var copyFilter = JSON.parse(JSON.stringify(storageData[id].filter));
 			var copyValue = JSON.parse(JSON.stringify(storageData[id].value));
-			storageData[idI] = new DataSourceEl(idI, (storageData[id].type === 'number' ? undefined: id), storageData[id].type, storageData[id].columns, copyValue, copyFilter, undefined, true);
+			storageData[idI] = new DataSourceEl(idI, id, storageData[id].type, storageData[id].columns, copyValue, copyFilter, undefined, true);
 
 			addDraggableElementEndPoint($('#' + idI), storageData[id].type);
 			$('#' + idI).contextMenu(menuContextConfig,{triggerOn:'contextmenu'});
