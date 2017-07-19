@@ -55,7 +55,8 @@ var getTableFilter = function(){
 			}
 			alert('[' + filters.join(' AND ') + ']');
 			break;
-			case "number":
+			case "long":
+			case "double":
 			    var sData = storageData[id].source == undefined ? storageData[id] : storageData[storageData[id].source];
 				sData.value = $('#input_' + sData.name).val();
 			break;
@@ -194,7 +195,8 @@ $('#myModal').on('shown.bs.modal', function (event) {
 					});
 					createFilters(val, newTable);
 		  break;
-		  case 'number':
+		  	case "long":
+			case "double":
 			$("#example").html('<tr><td align="center"><input id="input_'+ sData.name +'" type="text" value="'+ sData.value +'" style="width:100%"></input><td></tr>');
 		  break;
 	  }
@@ -393,7 +395,8 @@ var previewFile = function(){
 					var type = item.source !== undefined && storageData[item.source] !== undefined ? storageData[item.source].type : item.type;
 					switch(type){
 						case "table":
-						case "number":
+						case "long":
+						case "double":
 						case "temp":
 							var filter = {};
 							if(item.filter !== undefined || item.source !== undefined){
@@ -473,8 +476,8 @@ var arrIconsElement = {};
 	arrIconsElement["div"] = "glyphicon glyphicon-italic";
 	arrIconsElement["temp"] = "glyphicon glyphicon-search";
 	arrIconsElement["table"] = "glyphicon glyphicon-text-width";
-	arrIconsElement["number"] = "glyphicon glyphicon-bold";
-	
+	arrIconsElement["long"] = "glyphicon glyphicon-bold";
+	arrIconsElement["double"] = "glyphicon glyphicon-bold";
 	
 var createOperationEl = function(el, onWorkZone, filter){
 	var id = el.name;

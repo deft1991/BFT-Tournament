@@ -166,7 +166,8 @@ var createFormulsList = function(){
 							resArr.push(element);
 						break;
 						case 'table':
-						case 'number':
+						case 'long':
+						case 'double':
 							resArr.push(element);
 						break;
 					}
