@@ -478,12 +478,12 @@ var createTempTableNumberEl = function(el, filter){
 		newDiv.className = " tableNumber absoluteEl" + (type === 'temp' ? " tempOps" : "");
 		var dataParent = storageData[el.source];
 		if(dataParent !== undefined){
-			var txt = document.createTextNode(el.name + '(' + dataParent.type + ')');
+			var txt = document.createTextNode(el.name);
 			newDiv.appendChild(txt);
 			var copyFilter = JSON.parse(JSON.stringify(dataParent.filter));
 			storageData[id] = new DataSourceEl(id, el.source, el.type, dataParent.columns, dataParent.value, copyFilter, el.target, el.isWorkZone);
 		}else{
-			var txt = document.createTextNode(el.name + '(' + el.type + ')');
+			var txt = document.createTextNode(el.name);
 			newDiv.appendChild(txt);
 			storageData[id] = new DataSourceEl(id, undefined, el.type, el.columns, el.value, filter, el.target, el.isWorkZone);
 		}
@@ -494,7 +494,7 @@ var createTempTableNumberEl = function(el, filter){
 		addDraggableElementEndPoint($('#' + id), type);
 	}else{
 		newDiv.className = "draggable tableNumber";
-		var txt = document.createTextNode(el.name + '(' + type + ')');
+		var txt = document.createTextNode(el.name);
 		newDiv.appendChild(txt);
 		$('#toolBar').append(newDiv);
 		newDiv.onclick = function(e) {
