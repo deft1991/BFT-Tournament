@@ -28,6 +28,8 @@ var getTableFilter = function(){
 		switch(storageData[id].type){
 			case "table":
 			case "temp":
+			var sData = storageData[id].source == undefined ? storageData[id] : storageData[storageData[id].source];
+			sData.value = $('#example').DataTable().data();
 			var filters = [];
 			if(storageData[id].filter !== undefined){
 				Object.keys(storageData[id].filter).forEach(function(key, i){
@@ -165,12 +167,32 @@ $('#myModal').on('shown.bs.modal', function (event) {
 		  case 'table':
 				  function newTitle(x){var el = {title: x}; return el;}
 				  var tableColumns = sData.columns.map(c=>newTitle(c.name));
-				  var dataTableConf = {};
-				  dataTableConf["data"] = sData.value;
-				  dataTableConf["columns"] = tableColumns;
 				  
-				  $("#example").DataTable(dataTableConf);
-				  createFilters(val, newTable);
+				  var myTable = $('#example').DataTable({
+					  "sPaginationType": "full_numbers",
+					  data: sData.value,
+					  columns: tableColumns,
+					  dom: 'Bfrtip',
+					  select: 'single',
+					  responsive: true,
+					  altEditor: true,
+					  buttons: [{
+						text: 'Add',
+						name: 'add'
+					  },
+					  {
+						extend: 'selected',
+						text: 'Edit',
+						name: 'edit'
+					  },
+					  {
+						extend: 'selected',
+						text: 'Delete',
+						name: 'delete'
+					 }]
+
+					});
+					createFilters(val, newTable);
 		  break;
 		  case 'number':
 			$("#example").html('<tr><td align="center"><input id="input_'+ sData.name +'" type="text" value="'+ sData.value +'" style="width:100%"></input><td></tr>');
@@ -481,7 +503,7 @@ var createTempTableNumberEl = function(el, filter){
 			var txt = document.createTextNode(el.name);
 			newDiv.appendChild(txt);
 			var copyFilter = JSON.parse(JSON.stringify(dataParent.filter));
-			storageData[id] = new DataSourceEl(id, el.source, el.type, dataParent.columns, dataParent.value, copyFilter, el.target, el.isWorkZone);
+			storageData[id] = new DataSourceEl(id, el.source, el.type, dataParent.columns, undefined, copyFilter, el.target, el.isWorkZone);
 		}else{
 			var txt = document.createTextNode(el.name);
 			newDiv.appendChild(txt);
@@ -511,8 +533,7 @@ var createTempTableNumberEl = function(el, filter){
 			$('#' + idI).append(newSpanExt);
 							
 			var copyFilter = JSON.parse(JSON.stringify(storageData[id].filter));
-			var copyValue = JSON.parse(JSON.stringify(storageData[id].value));
-			storageData[idI] = new DataSourceEl(idI, id, storageData[id].type, storageData[id].columns, copyValue, copyFilter, undefined, true);
+			storageData[idI] = new DataSourceEl(idI, id, storageData[id].type, storageData[id].columns, undefined, copyFilter, undefined, true);
 
 			addDraggableElementEndPoint($('#' + idI), storageData[id].type);
 			$('#' + idI).contextMenu(menuContextConfig,{triggerOn:'contextmenu'});
