@@ -234,7 +234,7 @@ $('#myModal').on('shown.bs.modal', function (event) {
 				var foundCmpSymbols = value !== undefined && (value.includes('>') || value.includes('<') || value.includes('='));
 				if(foundCmpSymbols){
 					switch (inputFilters[i].type) {
-						case 'number':
+						case 'double':
 						case 'long':
 							if (value && match) {
 								countFilter(value, aData[inputFilters[i].iColumn]);
