@@ -178,9 +178,11 @@ var createFormulsList = function(){
 		}else{
 			//ошибка
 		}
-		
+		var data = storageData;
 	});
-	
+    var dataLoad;
+    dataLoad={"formuls":resStr,"filters":filters};
+    saveCalculate(dataLoad,"calculate", sessionId);
 	//formuls ассоциативный массив с формулами
 	alert('['+resStr.join('][')+']');
 		

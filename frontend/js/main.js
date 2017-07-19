@@ -21,7 +21,8 @@ var menuContextConfig = [{
 	
 	
 var filtersModal = {};
-
+var filters = [];
+var sources = [];
 var getTableFilter = function(){
 	var id = $('#elementId').val();
 	if(storageData[id] !== undefined){	
@@ -30,7 +31,7 @@ var getTableFilter = function(){
 			case "temp":
 			var sData = storageData[id].source == undefined ? storageData[id] : storageData[storageData[id].source];
 			sData.value = $('#example').DataTable().data();
-			var filters = [];
+
 			if(storageData[id].filter !== undefined){
 				Object.keys(storageData[id].filter).forEach(function(key, i){
 					var item = storageData[id].filter[key];
@@ -47,7 +48,8 @@ var getTableFilter = function(){
 								
 								filters.push(id + '.' + key + item.operation + ((item.type === 'string' || item.type === 'datetime') ? '"' + item.value + '"': item.value));
 							}else{
-								filters.push('CAST(' + id + '.' + key  + ' as varchar) like "%'+ item.value + '%"');
+								// filters.push('CAST(' + id + '.' + key  + ' as varchar) like "%'+ item.value + '%"');
+								filters.push({id : item.value});
 							}
 						}
 					}		
@@ -149,6 +151,7 @@ $('#myModal').on('shown.bs.modal', function (event) {
 				});
             }
         }
+        var data = storageData;
 		
     }
 
@@ -456,7 +459,7 @@ var previewFile = function(){
                     dataToSend.push(storageData[key]);
                 }
             });
-            saveLoadData(dataToSend);
+            saveLoadData(dataToSend,"start_service",sessionId );
 
             $('input[type=file]').val('');
 

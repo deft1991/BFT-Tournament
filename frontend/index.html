@@ -125,7 +125,8 @@
 </body>
 </html>
 <script>
-    var serviceURL = "http://localhost:6060/servletexam/mainServlet?action=start_service";
+//    var serviceURL = "http://localhost:6060/servletexam/mainServlet?action=start_service";
+    var serviceURL = "http://localhost:6060/servletexam/mainServlet?action=";
 
     $('#run').click(function() {
         getPaths();
@@ -136,7 +137,7 @@
         var name = JSON.stringify(items);
         console.log(name);
         $.ajax({
-            url: serviceURL,
+            url: serviceURL + "start_service",
             type: 'GET',
             crossDomain: true,
             dataType: "json", // data type get back from server
@@ -144,7 +145,7 @@
             success: function (data, textStatus, jqXHR) {
                 var data = $(data);
                 $('#id').append(data);
-
+                sessionId = data[0];
                 alert('Path created successfully. SessionID = ' + data[0] );
             },
             error: function (jqXHR, textStatus, errorThrown) {
@@ -152,12 +153,12 @@
             }
         });
     }
-
-    function saveLoadData(dataLoad) {
+var sessionId;
+    function saveLoadData(dataLoad,action,sessionId) {
         console.log('display paths');
         console.log(dataLoad);
         $.ajax({
-            url: serviceURL,
+            url: serviceURL +action + "&sessionId="+sessionId,
             type: 'GET',
             crossDomain: true,
             dataType: "json", // data type get back from server
@@ -165,14 +166,34 @@
             success: function (data, textStatus, jqXHR) {
                 var data = $(data);
                 $('#id').append(data);
-
-                alert('Path created successfully. SessionID = ' + data[0] );
+                sessionId = data[0];
+                alert('Path created successfully. SessionID = ' + data[0]);
             },
             error: function (jqXHR, textStatus, errorThrown) {
                 alert('Path Finder : ' + textStatus);
             }
         });
     }
+function saveCalculate(dataLoad,action,sessionId) {
+    console.log('display paths');
+    console.log(dataLoad);
+    $.ajax({
+        url: serviceURL +action + "&sessionId="+sessionId,
+        type: 'GET',
+        crossDomain: true,
+        dataType: "json", // data type get back from server
+        data: {"data": JSON.stringify(dataLoad)}, //data sent to server
+        success: function (data, textStatus, jqXHR) {
+            var data = $(data);
+            $('#id').append(data);
+            sessionId = data[0];
+            alert('Path created successfully. SessionID = ' + data[0]);
+        },
+        error: function (jqXHR, textStatus, errorThrown) {
+            alert('Path Finder : ' + textStatus);
+        }
+    });
+}
 
     var items = [{
         "name": "table_12",
