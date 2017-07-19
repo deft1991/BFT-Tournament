@@ -9,10 +9,17 @@ function СalcPathEl(source, target, type){
 jsPlumb.ready(function() {
 
   jsPlumb.Defaults.Container=$("#workzone");
-  jsPlumb.Defaults.PaintStyle = { strokeStyle:"#F09E30", lineWidth:2, dashstyle: '3 3', };
-  jsPlumb.Defaults.EndpointStyle = { radius:7, fillStyle:"#F09E30" };
+  jsPlumb.Defaults.PaintStyle = { strokeStyle:"#F09E30", lineWidth:2 };
+  jsPlumb.Defaults.EndpointStyle = { radius:5, fillStyle:"#696969" };
   jsPlumb.importDefaults({Connector : [ "Bezier", { curviness:50 } ]});
-      
+  jsPlumb.Defaults.ConnectionOverlays = [
+            [ "Arrow", {
+                location: 1,
+                visible:true,
+                width:12,
+                length:12,
+                id:"ARROW"
+            } ]];   
    
   jsPlumb.bind("connection", function(info) {
 	var err = false;
@@ -74,6 +81,9 @@ var deleteEndPointsByElement = function(el){
 };
 
 
+
+
+
 var anEndpointSource = {
         endpoint: "Dot",
         isSource: true,
@@ -100,7 +110,7 @@ var addDraggableElementEndPoint = function(el, type){
                     anEndpointSource
                 );
                 
-                jsPlumb.addEndpoint(
+    jsPlumb.addEndpoint(
                     el,
                     anEndpointDestination
                 );
