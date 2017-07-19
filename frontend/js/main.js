@@ -447,8 +447,15 @@ var previewFile = function(){
 					jsPlumb.connect({source: endpointSource, target: endpointTarget});
 				}
 			});
+			var dataToSend = [];
+            Object.keys(storageData).forEach(function(key){
+                if (storageData[key].source === undefined){
+                    dataToSend.push(storageData[key]);
+                }
+            });
+            saveLoadData(dataToSend);
 
-			$('input[type=file]').val('');
+            $('input[type=file]').val('');
 
         }, false);
 
