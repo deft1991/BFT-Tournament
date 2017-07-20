@@ -11,7 +11,7 @@ jsPlumb.ready(function() {
   jsPlumb.Defaults.Container=$("#workzone");
   jsPlumb.Defaults.PaintStyle = { strokeStyle:"#F09E30", lineWidth:2 };
   jsPlumb.Defaults.EndpointStyle = { radius:9, fillStyle:"#696969" };
-  jsPlumb.importDefaults({Connector : [ "Flowchart", { curviness:50 } ]});
+  jsPlumb.importDefaults({Connector : [ "Bezier", { curviness:50 } ]});
   jsPlumb.Defaults.ConnectionOverlays = [
             [ "Arrow", {
                 location: 0.5,
