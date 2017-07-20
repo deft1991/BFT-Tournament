@@ -156,12 +156,13 @@
             }
         });
     }
-var sessionId;
+var sessionID;
+
     function saveLoadData(dataLoad,action,sessionId) {
         console.log('display paths');
         console.log(dataLoad);
         $.ajax({
-            url: serviceURL +action + "&sessionId="+sessionId,
+            url: serviceURL +action + "&sessionId="+sessionID,
             type: 'GET',
             crossDomain: true,
             dataType: "json", // data type get back from server
@@ -169,7 +170,7 @@ var sessionId;
             success: function (data, textStatus, jqXHR) {
                 var data = $(data);
                 $('#id').append(data);
-                sessionId = data[0];
+                sessionID = data[0];
                 alert('Path created successfully. SessionID = ' + data[0]);
 				$("#validate").prop('disabled', false);
 				$("#run").prop('disabled', false);
@@ -183,7 +184,7 @@ function saveCalculate(dataLoad,action,sessionId) {
     console.log('display paths');
     console.log(dataLoad);
     $.ajax({
-        url: serviceURL +action + "&sessionId="+sessionId,
+        url: serviceURL +action + "&sessionId="+sessionID,
         type: 'GET',
         crossDomain: true,
         dataType: "json", // data type get back from server
@@ -191,10 +192,11 @@ function saveCalculate(dataLoad,action,sessionId) {
         success: function (data, textStatus, jqXHR) {
             var data = $(data);
             $('#id').append(data);
-            sessionId = data[0];
+            sessionID = data[0];
             alert('Path created successfully. SessionID = ' + data[0]);
         },
         error: function (jqXHR, textStatus, errorThrown) {
+            // добавить вывод корректной ошибки
             alert('Path Finder : ' + textStatus);
         }
     });

@@ -486,7 +486,7 @@ var sendDataToServer = function(){
     }
     });
     try{
-		saveLoadData(dataToSend,"start_service",sessionId );
+		saveLoadData(dataToSend,"start_service",sessionID );
 	}catch(e){
 		alert('Ошибка ' + e.name + ":" + e.message + "\n" + e.stack);
 	}

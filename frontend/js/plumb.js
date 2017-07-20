@@ -201,7 +201,7 @@ var createFormulsList = function(){
 	});
     var dataLoad = {"formuls":resStr,"filters":filters};
 	console.log(JSON.stringify(dataLoad));
-    saveCalculate(dataLoad,"calculate", sessionId);
+    saveCalculate(dataLoad,"calculate", sessionID);
 	//formuls ассоциативный массив с формулами
 	//alert('['+resStr.join('][')+']');
 		
