@@ -190,9 +190,10 @@ function saveCalculate(dataLoad,action,sessionId) {
         dataType: "json", // data type get back from server
         data: {"data": JSON.stringify(dataLoad)}, //data sent to server
         success: function (data, textStatus, jqXHR) {
-            var data = $(data);
-            $('#id').append(data);
-            sessionID = data[0];
+            //var data = $(data);
+            //$('#id').append(data);
+            //sessionID = data[0];
+			parseResult(data);
             alert('Path created successfully. SessionID = ' + data[0]);
         },
         error: function (jqXHR, textStatus, errorThrown) {

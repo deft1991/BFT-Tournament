@@ -104,7 +104,7 @@ var saveCurrentState = function(){
 	
 var Init = function(){
 //до отправки данных на сервер кнопки недоступны
-//$("#validate").prop('disabled', true);
+$("#validate").prop('disabled', true);
 $("#run").prop('disabled', true);
 $("#sendData").prop('disabled', true);
 	
@@ -589,3 +589,99 @@ var createTempTableNumberEl = function(el, filter){
 };
   
 //=====================================
+
+var dataTest = [{
+	"result": {
+		"type": "table",
+		"name": "temp1",
+		"columns": [{
+			"name": "result_0_0",
+			"type": "long"
+		}, {
+			"name": "result_0_1",
+			"type": "long"
+		}, {
+			"name": "result_0_2",
+			"type": "long"
+		}],
+		"value": [
+			[2, 4, 6],
+			[8, 10, 12],
+			[14, 16, 18]
+		],
+		
+	},
+	"formula": "t11+table_1->temp1"
+}, {
+	"result": {
+	    "name": "result11",
+		"type": "table",
+		"columns": [{
+			"name": "c1",
+			"type": "long"
+		}, {
+			"name": "c2",
+			"type": "long"
+		}, {
+			"name": "c3",
+			"type": "long"
+		}],
+		"value": [
+			[4, 5, 6]
+		],
+	},
+	"formula": "t->temp2"
+}];
+
+var parseResult = function(data){
+	//завершим, если не массив
+	if(data === undefined || !Array.isArray(data))
+		return;
+	data.forEach(function(el, i, arr){
+		if(el["result"] !== undefined && el["result"].name !== undefined){
+			var elStorage = storageData[el.result.name];
+			if(elStorage !== undefined){//если это temp 
+				var id = el.result.name;
+				if(id.includes('ZZZ')){//если уже отправляли, тогда обновим
+					elStorage["type"] = el["result"].type;
+					elStorage["columns"] = el["result"].columns;
+					elStorage["filter"] = {};
+					elStorage["value"] = undefined;
+					var elParentStorage = storageData[id];
+					elParentStorage["type"] = el["result"].type;
+					elParentStorage["columns"] = el["result"].columns;
+					elParentStorage["value"] = el["result"].value;
+					elParentStorage["filter"] = {};
+					
+				}else{//иначе создадим родителя
+					var newId = el.result.name + "ZZZ";
+					$('#' + id).attr('id', newId);
+					var copyElStorage = JSON.parse(JSON.stringify(elStorage));
+					copyElStorage["name"] = newId;
+					copyElStorage["source"] = id;
+					copyElStorage["type"] = el["result"].type;
+					copyElStorage["columns"] = el["result"].columns;
+					copyElStorage["value"] = undefined;
+					copyElStorage["filter"] = {};
+					storageData[newId] = copyElStorage;
+					
+					var indexRem = calcPath.findIndex(e=> e.source === id);
+		
+					if(indexRem > -1){
+						calcPath[indexRem].source = newId;
+					}
+					
+					indexRem = calcPath.findIndex(e=> e.target === id);
+		
+					if(indexRem > -1){
+						calcPath[indexRem].target = newId;
+					}
+						createTempTableNumberEl(el["result"],{});
+				}
+			}else{//это result
+				createTempTableNumberEl(el["result"],{});
+			}
+		}
+	});
+	
+};
