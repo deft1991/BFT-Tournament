@@ -103,11 +103,15 @@ var saveCurrentState = function(){
 //===============================================================
 	
 var Init = function(){
+//до отправки данных на сервер кнопки недоступны
+$("#validate").prop('disabled', true);
+$("#run").prop('disabled', true);
 	
 $('#filterAccept').click(getTableFilter);
 
 $('#save').click(saveCurrentState);
 
+$('#sendData').click(sendDataToServer);
 	
 //========model window===========
 $('#myModal').on('shown.bs.modal', function (event) {
@@ -374,9 +378,11 @@ var previewFile = function(){
         var reader = new FileReader();
 
         reader.addEventListener("load", function () {
-            console.log(reader.result);
+        console.log(reader.result);
+		try{
             var data = JSON.parse(reader.result);
-				
+			
+			
 			Object.keys(storageData).forEach(function(item, i, arr){ 
 				if(storageData[item] !== undefined){
 					var indexRem = data.findIndex(el=> el.name === item);
@@ -417,7 +423,7 @@ var previewFile = function(){
 											fakeElFilter.operation = item.filter[elFilter].operation !== undefined ? item.filter[elFilter].operation : '';
 											filter[elFilter] = fakeElFilter;
 										}else{
-											alert('Некорректный фильтр у таблицы' + item.name);
+											throw 'Некорректный фильтр у таблицы' + item.name;
 										}
 									});
 								}
@@ -437,7 +443,7 @@ var previewFile = function(){
 								createOperationEl(item);
 						break;
 						default:
-							alert('Неизвестный тип данных!');
+							throw'Неизвестный тип данных!' + type;
 						break;
 					}
 	
@@ -453,22 +459,30 @@ var previewFile = function(){
 					jsPlumb.connect({source: endpointSource, target: endpointTarget});
 				}
 			});
-			var dataToSend = [];
-            Object.keys(storageData).forEach(function(key){
-                if (storageData[key].source === undefined){
-                    dataToSend.push(storageData[key]);
-                }
-            });
-            saveLoadData(dataToSend,"start_service",sessionId );
-
-            $('input[type=file]').val('');
-
+			$('input[type=file]').val('');
+		}catch(e){
+			alert('Ошибка ' + e.name + ":" + e.message + "\n" + e.stack);
+		}
         }, false);
 
         if (file) {
             reader.readAsText(file);
         }
     };
+	
+var sendDataToServer = function(){
+	var dataToSend = [];
+    Object.keys(storageData).forEach(function(key){
+    if (storageData[key].source === undefined){
+        dataToSend.push(storageData[key]);
+    }
+    });
+    try{
+		saveLoadData(dataToSend,"start_service",sessionId );
+	}catch(e){
+		alert('Ошибка ' + e.name + ":" + e.message + "\n" + e.stack);
+	}
+};
 	
   
 //=========создание элемента===========

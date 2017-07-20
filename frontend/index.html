@@ -75,6 +75,9 @@
 					<span class="btn btn-success btn-file  btn-lg glyphicon glyphicon-folder-open">
 						<input id="loadDataByFile" type="file" onchange="previewFile()"/>
 					</span>
+					<button id="sendData" type="button" class="btn btn-success btn-lg"> 
+						<span class="glyphicon glyphicon-send"></span>
+					</button>
 					<button id="validate" type="button" class="btn btn-success btn-lg" onclick="createFormulsList()"> 
 						<span class="glyphicon glyphicon-check"></span>
 					</button>
@@ -168,6 +171,8 @@ var sessionId;
                 $('#id').append(data);
                 sessionId = data[0];
                 alert('Path created successfully. SessionID = ' + data[0]);
+				$("#validate").prop('disabled', false);
+				$("#run").prop('disabled', false);
             },
             error: function (jqXHR, textStatus, errorThrown) {
                 alert('Path Finder : ' + textStatus);
