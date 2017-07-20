@@ -15,7 +15,7 @@ var menuContextConfig = [{
         img: 'img/remove.png',
         title: 'delete button',
         fun: function (e1,e2) {
-			deleteEndPointsByElement($('#' + e1.trigger[0].id));
+			deleteEndPointsByElement($('#' + e1.trigger[0].id), true);
         }
     }];
 	
@@ -30,8 +30,8 @@ var getTableFilter = function(){
 			case "table":
 			case "temp":
 			var sData = storageData[id].source == undefined ? storageData[id] : storageData[storageData[id].source];
-			sData.value = $('#example').DataTable().data();
-
+			var data = Array.from($('#example').DataTable().data());
+			sData.value = data;
 			if(storageData[id].filter !== undefined){
 				Object.keys(storageData[id].filter).forEach(function(key, i){
 					var item = storageData[id].filter[key];
@@ -354,7 +354,7 @@ $("#nav").on('click','.btnNav',function(e) {
 		var e = $("#" + el.getAttribute("id"));
 		
 		if(e.hasClass( "border" )){
-            deleteEndPointsByElement(e);
+            deleteEndPointsByElement(e, true);
 		}
 	});
   });
@@ -389,7 +389,7 @@ var previewFile = function(){
 					var indexRem = data.findIndex(el=> el.name === item);
 		
 					if(indexRem == -1){
-						deleteEndPointsByElement($('#'+item));
+						deleteEndPointsByElement($('#'+item), true);
 					}	
 				}				
 			});
@@ -535,7 +535,7 @@ var createTempTableNumberEl = function(el, filter){
 		newDiv.className = " tableNumber absoluteEl" + (type === 'temp' ? " tempOps" : "");
 		var dataParent = storageData[el.source];
 		if(dataParent !== undefined){
-			var txt = document.createTextNode(el.name);
+			var txt = document.createTextNode(el.name + '(' + dataParent.name + ')');
 			newDiv.appendChild(txt);
 			var copyFilter = JSON.parse(JSON.stringify(dataParent.filter));
 			storageData[id] = new DataSourceEl(id, el.source, el.type, dataParent.columns, undefined, copyFilter, el.target, el.isWorkZone);
@@ -561,7 +561,7 @@ var createTempTableNumberEl = function(el, filter){
 			i++;
 			var newAgentExt = $('<div>').attr('id', idI).addClass('tableNumber').addClass('absoluteEl');
 			var newSpanExt = $('<span>').attr('id', "span" + idI).addClass(arrIconsElement[storageData[id].type]);
-			newAgentExt.text(id);
+			newAgentExt.text(idI + '(' + id + ')');
 							
 			$('#workzone').append(newAgentExt);
 			$('#' + idI).append("<br>");
@@ -643,7 +643,7 @@ var parseResult = function(data){
 			if(elStorage !== undefined){//если это temp или повторный result 
 				var id = el.result.name;
 				if(id.includes('ZZZ')){//если уже отправляли, тогда обновим
-					elStorage["type"] = el["result"].type;
+					elStorage["type"] = "temp";
 					elStorage["columns"] = el["result"].columns;
 					elStorage["value"] = el["result"].value;
 					elStorage["filter"] = {};
@@ -658,31 +658,53 @@ var parseResult = function(data){
 					
 				}else{//иначе создадим родителя
 					var newId = el.result.name + "ZZZ";
-					$('#' + id).attr('id', newId);
-					var copyElStorage = JSON.parse(JSON.stringify(elStorage));
-					copyElStorage["name"] = newId;
-					copyElStorage["source"] = id;
-					copyElStorage["type"] = el["result"].type;
-					copyElStorage["columns"] = el["result"].columns;
-					copyElStorage["value"] = undefined;
-					copyElStorage["filter"] = {};
-					storageData[newId] = copyElStorage;
 					
 					var indexRem = calcPath.findIndex(e=> e.source === id);
-		
+					var sourcePoint, targetPoint;
 					if(indexRem > -1){
 						calcPath[indexRem].source = newId;
+						targetPoint = calcPath[indexRem].target;
 					}
 					
 					indexRem = calcPath.findIndex(e=> e.target === id);
 		
 					if(indexRem > -1){
 						calcPath[indexRem].target = newId;
+						sourcePoint = calcPath[indexRem].source;
 					}
 					
-					createTempTableNumberEl(el["result"],{});
+					deleteEndPointsByElement($('#' + id), false);
 					
+					$('#' + id).attr('id', newId);
+					
+					var copyElStorage = JSON.parse(JSON.stringify(elStorage));
+					copyElStorage["name"] = newId;
+					copyElStorage["source"] = id;
+					copyElStorage["type"] = "temp";
+					copyElStorage["columns"] = el["result"].columns;
+					copyElStorage["value"] = undefined;
+					copyElStorage["filter"] = {};
+					storageData[newId] = copyElStorage;
+					
+					createTempTableNumberEl(el["result"],{});
+					$('#' + newId).text(newId + '(' + id + ')');
 					$('#' + id).attr('title', el.formula);
+
+					
+					
+					addDraggableElementEndPoint($('#' + newId), el["result"].type);
+					
+					if(sourcePoint !== undefined){
+						var endpointSource = jsPlumb.getEndpoints($('#' + sourcePoint)).find(function(el, i, arr){return el.isSource;});
+						var endpointTarget = jsPlumb.getEndpoints($('#' + newId)).find(function(el, i, arr){return el.isTarget;});
+						jsPlumb.connect({source: endpointSource, target: endpointTarget});
+					}
+					
+					if(targetPoint !== undefined){
+						var endpointSource = jsPlumb.getEndpoints($('#' + newId)).find(function(el, i, arr){return el.isSource;});
+						var endpointTarget = jsPlumb.getEndpoints($('#' + targetPoint)).find(function(el, i, arr){return el.isTarget;});
+						jsPlumb.connect({source: endpointSource, target: endpointTarget});
+					}
 				}
 			}else{//это result 1 раз пришел
 				createTempTableNumberEl(el["result"],{});

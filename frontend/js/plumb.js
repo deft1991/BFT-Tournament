@@ -58,19 +58,18 @@ jsPlumb.ready(function() {
 
 });
 
-var deleteEndPointsByElement = function(el){
+var deleteEndPointsByElement = function(el, isDeleteElem){
 	var endpoints = jsPlumb.getEndpoints(el);
 	if(endpoints !== undefined)
 		endpoints.forEach(function(item, i, arr){jsPlumb.deleteEndpoint(item);});
+	
 	
 	var childs = [];
 	var id = el[0].id === undefined ? el.id : el[0].id;
 	Object.keys(storageData).forEach(function(item, i, arr){ 
 		if(storageData[item].source == id)
-			deleteEndPointsByElement($('#'+item));
+			deleteEndPointsByElement($('#'+item), isDeleteElem);
 	});
-	
-	delete storageData[id];
 	
 	var indexRem = calcPath.findIndex(e=> e.source === id);
 	
@@ -78,7 +77,12 @@ var deleteEndPointsByElement = function(el){
 		calcPath.splice(indexRem, 1);
 	}
 	
-	el.remove();
+	storageData[id].target = undefined;
+	
+	if(isDeleteElem){
+	delete storageData[id];
+		el.remove();
+	}
 };
 
 
@@ -171,7 +175,8 @@ var createFormulsList = function(){
 						case 'long':
 						case 'double':
 							var obj = {};
-							obj[storageData[element].type] = element;
+							obj["name"] = element;
+							obj["type"] = storageData[element].type;
 							if(storageData[element].source !== undefined){
 								obj["source"] = storageData[element].source;
 							}
