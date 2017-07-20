@@ -81,6 +81,12 @@ var getTableFilter = function(){
 			case "double":
 			    var sData = storageData[id].source == undefined ? storageData[id] : storageData[storageData[id].source];
 				sData.value = $('#input_' + sData.name).val();
+				//обновим на сервере
+				updateData(
+				formElementToTransfer(sData),
+				"save_data",
+				sessionID
+				);
 			break;
 		}
 	}
