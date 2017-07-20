@@ -640,18 +640,20 @@ var parseResult = function(data){
 	data.forEach(function(el, i, arr){
 		if(el["result"] !== undefined && el["result"].name !== undefined){
 			var elStorage = storageData[el.result.name];
-			if(elStorage !== undefined){//если это temp 
+			if(elStorage !== undefined){//если это temp или повторный result 
 				var id = el.result.name;
 				if(id.includes('ZZZ')){//если уже отправляли, тогда обновим
 					elStorage["type"] = el["result"].type;
 					elStorage["columns"] = el["result"].columns;
+					elStorage["value"] = el["result"].value;
 					elStorage["filter"] = {};
-					elStorage["value"] = undefined;
-					var elParentStorage = storageData[id];
-					elParentStorage["type"] = el["result"].type;
-					elParentStorage["columns"] = el["result"].columns;
-					elParentStorage["value"] = el["result"].value;
-					elParentStorage["filter"] = {};
+					var elParentStorage = storageData[storageData[id].source];
+					if(elParentStorage !== undefined){
+						elParentStorage["type"] = el["result"].type;
+						elParentStorage["columns"] = el["result"].columns;
+						elParentStorage["value"] = el["result"].value;
+						elParentStorage["filter"] = {};
+					}
 					
 				}else{//иначе создадим родителя
 					var newId = el.result.name + "ZZZ";
@@ -678,7 +680,7 @@ var parseResult = function(data){
 					}
 						createTempTableNumberEl(el["result"],{});
 				}
-			}else{//это result
+			}else{//это result 1 раз пришел
 				createTempTableNumberEl(el["result"],{});
 			}
 		}
