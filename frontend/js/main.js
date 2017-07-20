@@ -32,6 +32,23 @@ var formElementToTransfer = function(el){
 	}
 	return resData;
 }
+
+var formElementToTransferLoad = function(el){
+	
+	var resData = {};
+	resData["name"] = el.name;
+	resData["type"] = el.type;
+	
+	if(el.source !== undefined){
+	   resData["source"] = el.source;
+	}else{
+		resData["value"] = el.value;
+	}
+	if(el.type === "table"){
+		el["columns"] = el.columns;
+	}
+	return resData;
+}
 	
 	
 var filtersModal = {};
@@ -508,7 +525,7 @@ var sendDataToServer = function(){
 	var dataToSend = [];
     Object.keys(storageData).forEach(function(key){
     if (storageData[key].source === undefined){
-        dataToSend.push(storageData[key]);
+        dataToSend.push(formElementToTransferLoad(storageData[key]));
     }
     });
     try{
