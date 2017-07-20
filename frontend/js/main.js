@@ -106,6 +106,7 @@ var Init = function(){
 //до отправки данных на сервер кнопки недоступны
 $("#validate").prop('disabled', true);
 $("#run").prop('disabled', true);
+$("#sendData").prop('disabled', true);
 	
 $('#filterAccept').click(getTableFilter);
 
@@ -448,6 +449,9 @@ var previewFile = function(){
 					}
 	
             });
+			//теперь можно отправлять данные на сервер
+			$("#sendData").prop('disabled', true);
+			
 			//устанавливаем связи
 			Object.keys(storageData).forEach(function(key){
 				if(storageData[key].target !== undefined 
@@ -459,9 +463,13 @@ var previewFile = function(){
 					jsPlumb.connect({source: endpointSource, target: endpointTarget});
 				}
 			});
+			$("#sendData").prop('disabled', false);
 			$('input[type=file]').val('');
 		}catch(e){
 			alert('Ошибка ' + e.name + ":" + e.message + "\n" + e.stack);
+			$("#sendData").prop('disabled', true);
+			$("#run").prop('disabled', true);
+			$("#validate").prop('disabled', true);
 		}
         }, false);
 
