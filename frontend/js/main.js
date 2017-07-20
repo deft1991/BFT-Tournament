@@ -466,7 +466,7 @@ var previewFile = function(){
 			$("#sendData").prop('disabled', false);
 			$('input[type=file]').val('');
 		}catch(e){
-			alert('Ошибка ' + e.name + ":" + e.message + "\n" + e.stack);
+			alert('Ошибка ' + e);
 			$("#sendData").prop('disabled', true);
 			$("#run").prop('disabled', true);
 			$("#validate").prop('disabled', true);
@@ -715,15 +715,11 @@ var parseResult = function(data){
 };
 
 var checkResponse = function(response){
-	// if(response === undefined || !Array.isArray(response) || response.length <= 0)
-	if(response === undefined || response.length <= 0)
+	var err = response[0].error;
+	
+	if(err !== undefined){
+		alert(err);
 		return false;
-	
-	// var err = response[0].error;
-	
-	// if(err !== undefined){
-	// 	alert(err);
-	// 	return false;
-	// }
-	// return true;
+	}
+	return true;
 }

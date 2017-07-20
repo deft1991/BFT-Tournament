@@ -146,10 +146,10 @@
             dataType: "json", // data type get back from server
             data: {"data": name}, //data sent to server
             success: function (data, textStatus, jqXHR) {
-//				if(checkResponse(data)){
-					sessionID = data;
+				if(checkResponse(data)){
+					sessionID = data[0].sessionId;
                 alert('getPaths created successfully. SessionID = ' + data[0] );
-//				}
+				}
             },
             error: function (jqXHR, textStatus, errorThrown) {
                 alert('Path Finder : ' + textStatus);
@@ -168,18 +168,15 @@ var sessionID;
             dataType: "json", // data type get back from server
             data: {"data": JSON.stringify(dataLoad)}, //data sent to server
             success: function (data, textStatus, jqXHR) {
-//				if(checkResponse(data)){
-                if (Array.isArray(data))
-                    sessionID = data[0];
-				else sessionID = data;
-
+				if(checkResponse(data)){
+                    sessionID = data[0].sessionId;
 					alert('saveLoadData(). SessionID = ' +sessionID);
 					$("#validate").prop('disabled', false);
 					$("#run").prop('disabled', false);
-//				}
+				}
             },
-            error: function (jqXHR, textStatus, errorThrown) {
-                alert('Path Finder : ' + textStatus);
+            error: function (jqXHR, textStatus, data) {
+                alert('Path Finder : ' + data[0].error);
             }
         });
     }
@@ -193,14 +190,14 @@ function saveCalculate(dataLoad,action,sessionId) {
         dataType: "json", // data type get back from server
         data: {"data": JSON.stringify(dataLoad)}, //data sent to server
         success: function (data, textStatus, jqXHR) {
-//            if(checkResponse(data)){
+            if(checkResponse(data)){
 				parseResult(data);
 				alert('saveCalculate(). Formuls calculate success');
-//			}
+			}
         },
-        error: function (jqXHR, textStatus, errorThrown) {
+        error: function (jqXHR, textStatus, data) {
             // добавить вывод корректной ошибки
-            alert('Path Finder : ' + textStatus);
+            alert('АХТУНГ!!:?!?!%* WTF : ' + data[0].error);
         }
     });
 }
