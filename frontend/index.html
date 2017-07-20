@@ -190,7 +190,7 @@ var sessionID;
             dataType: "json", 
             data: {"data": JSON.stringify(dataLoad)},
             success: function (data, textStatus, jqXHR) {
-				alert('updateData. SessionID = ' +sessionID);
+				alert('updateData. Update succsess. Value = ' +data[0].value);
             },
             error: function (jqXHR, textStatus, errorThrown) {
                 alert('Path Finder : ' + textStatus);
