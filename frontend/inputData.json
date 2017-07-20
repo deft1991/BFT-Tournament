@@ -45,11 +45,11 @@
 {
             "name": "A_1",
             "type": "long",
-            "value": 234234
+            "value": 10000
 },
 {
             "name": "B_1",
             "type": "long",
-            "value": 21314.545
+            "value": 5000.500
 }
 ]

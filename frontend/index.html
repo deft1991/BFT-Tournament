@@ -195,7 +195,7 @@ function saveCalculate(dataLoad,action,sessionId) {
         success: function (data, textStatus, jqXHR) {
 //            if(checkResponse(data)){
 				parseResult(data);
-				alert('saveCalculate(). SessionID = ' + data[0]);
+				alert('saveCalculate(). Formula = ' + data[0].formula + " result = " + data[0].result.value);
 //			}
         },
         error: function (jqXHR, textStatus, errorThrown) {

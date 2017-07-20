@@ -191,14 +191,18 @@ var createFormulsList = function(){
 							if(fFilter){
 								obj["filter"] = filterEl;
 							}
-							filters.push(obj);
-							resArr.push(element);
-						break;
+                            if (!~obj.name.indexOf("result")) {
+                                filters.push(obj);
+                                resArr.push(element);
+                            }
+                            break;
 					}
 				}
 			});
-			formuls[key] = resArr.join('');
-			resStr.push(formuls[key]);
+            if (!~key.indexOf("result")) {
+                formuls[key] = resArr.join('');
+                resStr.push(formuls[key]);
+            }
 		}else{
 			//ошибка
 		}
