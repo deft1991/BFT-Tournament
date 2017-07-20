@@ -715,7 +715,7 @@ var parseResult = function(data){
 };
 
 var checkResponse = function(response){
-	if(data === undefined || !Array.isArray(data) || response.length <= 0)
+	if(response === undefined || !Array.isArray(response) || response.length <= 0)
 		return false;
 	
 	var err = response[0].error;
