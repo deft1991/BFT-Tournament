@@ -19,6 +19,20 @@ var menuContextConfig = [{
         }
     }];
 	
+var formElementToTransfer = function(el){
+	var element = el.source === undefined ? el : storageData[el.source];
+	
+	var resData = {};
+	resData["name"] = element.name;
+	resData["type"] = element.type;
+	resData["value"] = element.value;
+	
+	if(element.type === "table"){
+		resData["columns"] = element.columns;
+	}
+	return resData;
+}
+	
 	
 var filtersModal = {};
 var filters = [];
@@ -32,6 +46,12 @@ var getTableFilter = function(){
 			var sData = storageData[id].source == undefined ? storageData[id] : storageData[storageData[id].source];
 			var data = Array.from($('#example').DataTable().data());
 			sData.value = data;
+			//обновим на сервере
+			updateData(
+			formElementToTransfer(sData),
+			"save_data",
+			sessionID
+			);
 			if(storageData[id].filter !== undefined){
 				Object.keys(storageData[id].filter).forEach(function(key, i){
 					var item = storageData[id].filter[key];

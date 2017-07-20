@@ -180,6 +180,23 @@ var sessionID;
             }
         });
     }
+	
+    function updateData(dataLoad,action,sessionId) {
+        console.log('updateData(dataLoad,action,sessionId): ' + dataLoad);
+        $.ajax({
+            url: serviceURL +action + "&sessionId="+sessionID,
+            type: 'GET',
+            crossDomain: true,
+            dataType: "json", 
+            data: {"data": JSON.stringify(dataLoad)},
+            success: function (data, textStatus, jqXHR) {
+				alert('updateData. SessionID = ' +sessionID);
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                alert('Path Finder : ' + textStatus);
+            }
+        });
+    }
 function saveCalculate(dataLoad,action,sessionId) {
     console.log('display paths');
     console.log(dataLoad);
