@@ -526,7 +526,7 @@ var sendDataToServer = function(){
     Object.keys(storageData).forEach(function(key){
     if (storageData[key].source === undefined){
         //dataToSend.push(formElementToTransferLoad(storageData[key]));
-		dataToSend.push(formElementToTransferLoad(storageData[key]));
+		dataToSend.push(storageData[key]);
     }
     });
     try{
