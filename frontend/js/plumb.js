@@ -135,6 +135,7 @@ var createFormulsList = function(){
 		return [];
 	}
 	var resStr = [];
+	var filters = [];
 	Object.keys(formuls).forEach(function(key, id){
 		
 		var err = false;
@@ -168,6 +169,23 @@ var createFormulsList = function(){
 						case 'table':
 						case 'long':
 						case 'double':
+							var obj = {};
+							obj[storageData[element].type] = element;
+							if(storageData[element].source !== undefined){
+								obj["source"] = storageData[element].source;
+							}
+							var filterEl = [];
+							var fFilter = false;
+							Object.keys(storageData[element].filter).forEach(function(e,i,arr){
+								if(storageData[element].filter[e].value !== "" && storageData[element].filter[e].value !== undefined){
+									filterEl.push({name:e,operation: storageData[element].filter[e].operation,value: storageData[element].filter[e].value,type: storageData[element].filter[e].type});
+									fFilter = true;
+								}
+							});
+							if(fFilter){
+								obj["filter"] = filterEl;
+							}
+							filters.push(obj);
 							resArr.push(element);
 						break;
 					}
@@ -180,11 +198,11 @@ var createFormulsList = function(){
 		}
 		var data = storageData;
 	});
-    var dataLoad;
-    dataLoad={"formuls":resStr,"filters":filters};
-    saveCalculate(dataLoad,"calculate", sessionId);
+    var dataLoad = {"formuls":resStr,"filters":filters};
+	console.log(JSON.stringify(dataLoad));
+    //saveCalculate(dataLoad,"calculate", sessionId);
 	//formuls ассоциативный массив с формулами
-	alert('['+resStr.join('][')+']');
+	//alert('['+resStr.join('][')+']');
 		
 };
 

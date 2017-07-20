@@ -104,7 +104,7 @@ var saveCurrentState = function(){
 	
 var Init = function(){
 //до отправки данных на сервер кнопки недоступны
-$("#validate").prop('disabled', true);
+//$("#validate").prop('disabled', true);
 $("#run").prop('disabled', true);
 $("#sendData").prop('disabled', true);
 	
