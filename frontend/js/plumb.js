@@ -9,8 +9,8 @@ function СalcPathEl(source, target, type){
 jsPlumb.ready(function() {
 
   jsPlumb.Defaults.Container=$("#workzone");
-  jsPlumb.Defaults.PaintStyle = { strokeStyle:"#F09E30", lineWidth:2 };
-  jsPlumb.Defaults.EndpointStyle = { radius:9, fillStyle:"#696969" };
+  jsPlumb.Defaults.PaintStyle = { strokeStyle:"gray", lineWidth:2 };
+  jsPlumb.Defaults.EndpointStyle = { radius:9, fillStyle:"gray" };
   jsPlumb.importDefaults({Connector : [ "Bezier", { curviness:50 } ]});
   jsPlumb.Defaults.ConnectionOverlays = [
             [ "Arrow", {
@@ -94,7 +94,7 @@ var anEndpointSource = {
         isSource: true,
         isTarget: false,
         maxConnections: 1,
-        anchor: [1,0.5,0,0]
+        anchor: [0.95,0.5,0,0]
     };
 
 var anEndpointDestination = {
