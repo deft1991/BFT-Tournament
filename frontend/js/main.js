@@ -713,3 +713,16 @@ var parseResult = function(data){
 		}
 	});
 };
+
+var checkResponse = function(response){
+	if(data === undefined || !Array.isArray(data) || response.length <= 0)
+		return false;
+	
+	var err = response[0].error;
+	
+	if(err !== undefined){
+		alert(err);
+		return false;
+	}
+	return true;
+}
