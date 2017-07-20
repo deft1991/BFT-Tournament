@@ -653,6 +653,7 @@ var parseResult = function(data){
 						elParentStorage["columns"] = el["result"].columns;
 						elParentStorage["value"] = el["result"].value;
 						elParentStorage["filter"] = {};
+						$('#' + elParentStorage.name).attr('title', el.formula);
 					}
 					
 				}else{//иначе создадим родителя
@@ -678,12 +679,15 @@ var parseResult = function(data){
 					if(indexRem > -1){
 						calcPath[indexRem].target = newId;
 					}
-						createTempTableNumberEl(el["result"],{});
+					
+					createTempTableNumberEl(el["result"],{});
+					
+					$('#' + id).attr('title', el.formula);
 				}
 			}else{//это result 1 раз пришел
 				createTempTableNumberEl(el["result"],{});
+				$('#' + el["result"].name).attr('title', el.formula);
 			}
 		}
 	});
-	
 };
