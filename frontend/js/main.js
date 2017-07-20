@@ -715,14 +715,15 @@ var parseResult = function(data){
 };
 
 var checkResponse = function(response){
-	if(response === undefined || !Array.isArray(response) || response.length <= 0)
+	// if(response === undefined || !Array.isArray(response) || response.length <= 0)
+	if(response === undefined || response.length <= 0)
 		return false;
 	
-	var err = response[0].error;
+	// var err = response[0].error;
 	
-	if(err !== undefined){
-		alert(err);
-		return false;
-	}
-	return true;
+	// if(err !== undefined){
+	// 	alert(err);
+	// 	return false;
+	// }
+	// return true;
 }
