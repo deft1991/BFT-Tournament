@@ -11,15 +11,16 @@ jsPlumb.ready(function() {
   jsPlumb.Defaults.Container=$("#workzone");
   jsPlumb.Defaults.PaintStyle = { strokeStyle:"#F09E30", lineWidth:2 };
   jsPlumb.Defaults.EndpointStyle = { radius:5, fillStyle:"#696969" };
-  jsPlumb.importDefaults({Connector : [ "Bezier", { curviness:50 } ]});
+  jsPlumb.importDefaults({Connector : [ "Flowchart", { curviness:50 } ]});
   jsPlumb.Defaults.ConnectionOverlays = [
             [ "Arrow", {
-                location: 1,
+                location: 0.5,
+				direction: 1,
                 visible:true,
-                width:12,
-                length:12,
+                width:15,
+                length:15,
                 id:"ARROW"
-            } ]];   
+            }]];   
    
   jsPlumb.bind("connection", function(info) {
 	var err = false;
@@ -200,7 +201,7 @@ var createFormulsList = function(){
 	});
     var dataLoad = {"formuls":resStr,"filters":filters};
 	console.log(JSON.stringify(dataLoad));
-    //saveCalculate(dataLoad,"calculate", sessionId);
+    saveCalculate(dataLoad,"calculate", sessionId);
 	//formuls ассоциативный массив с формулами
 	//alert('['+resStr.join('][')+']');
 		
