@@ -123,7 +123,7 @@ var addDraggableElementEndPoint = function(el, type){
 };
 
 
-var createFormulsList = function(){
+var createFormulsList = function(funcProcess){
 	
 	var formuls = {};
 	calcPath.map(el=>formuls[el.source] = "");
@@ -210,7 +210,7 @@ var createFormulsList = function(){
 	});
     var dataLoad = {"formuls":resStr,"filters":filters};
 	console.log(JSON.stringify(dataLoad));
-    saveCalculate(dataLoad,"calculate", sessionID);
+    funcProcess(dataLoad,"calculate", sessionID);
 	//formuls ассоциативный массив с формулами
 	//alert('['+resStr.join('][')+']');
 		

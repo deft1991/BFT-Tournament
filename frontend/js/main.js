@@ -358,7 +358,7 @@ $("#nav").on('click','.btnNav',function(e) {
 	cl["mul"] = "glyphicon glyphicon-remove";
 	cl["div"] = "glyphicon glyphicon-italic";
 	cl["temp"] = "glyphicon glyphicon-search";
-	
+
 	var newAgent = $('<div>').attr('id', id + i).addClass('absoluteEl');
 	if(id == "temp"){
 		newAgent.addClass("tempOps").addClass("tableNumber");
@@ -830,7 +830,7 @@ var parseResult = function(data){
 				}else{
 					
 					if(elStorage.source == undefined){//повторный result
-						elStorage["type"] = "temp";
+						elStorage["type"] = el["result"].type;
 						elStorage["columns"] = el["result"].columns;
 						elStorage["value"] = el["result"].value;
 						elStorage["filter"] = {};

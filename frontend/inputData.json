@@ -46,14 +46,24 @@
             "name": "table_4",
             "type": "table",
             "value": [
-					[ "1", "2", "3" ],
-					[ "4", "5", "6" ],
-					[ "7", "8", "9" ]
+					[ "13", "26"],
+					[ "39", "13"]
 			],
             "columns": [
-			  {"name": "a1","type": "long"},{"name": "a2","type": "long"},{"name": "a3","type": "long"}
+			  {"name": "a1","type": "long"},{"name": "a2","type": "long"}
             ]
 },
+  {
+    "name": "table_5",
+    "type": "table",
+    "value": [
+      [ "7", "4"],
+      [ "2", "3"]
+    ],
+    "columns": [
+      {"name": "b1","type": "long"},{"name": "b2","type": "long"}
+    ]
+  },
 {
             "name": "A_1",
             "type": "long",

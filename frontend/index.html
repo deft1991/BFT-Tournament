@@ -78,10 +78,10 @@
 					<button id="sendData" type="button" class="btn btn-success btn-lg"> 
 						<span class="glyphicon glyphicon-send"></span>
 					</button>
-					<button id="validate" type="button" class="btn btn-success btn-lg" onclick="createFormulsList()"> 
+					<button id="validate" type="button" class="btn btn-success btn-lg" onclick="createFormulsList(checkCalculate)">
 						<span class="glyphicon glyphicon-check"></span>
 					</button>
-					<button id="run" type="button" class="btn btn-success btn-lg"> 
+					<button id="run" type="button" class="btn btn-success btn-lg" onclick="createFormulsList(saveCalculate)">
 						<span class="glyphicon glyphicon-play"></span>
 					</button>
 					<button id="save" type="button" class="btn btn-success btn-lg"> 
@@ -130,10 +130,6 @@
 <script>
 //    var serviceURL = "http://localhost:6060/servletexam/mainServlet?action=start_service";
     var serviceURL = "http://localhost:6060/servletexam/mainServlet?action=";
-
-    $('#run').click(function() {
-        getPaths();
-    });
 
     function getPaths() {
         console.log('display paths');
@@ -190,7 +186,7 @@ var sessionID;
             dataType: "json", 
             data: {"data": JSON.stringify(dataLoad)},
             success: function (data, textStatus, jqXHR) {
-				alert('updateData. Update succsess. Value = ' +data[0].value);
+				alert('updateData. Update succsess. ' +data[0].value);
             },
             error: function (jqXHR, textStatus, errorThrown) {
                 alert('Path Finder : ' + textStatus);
@@ -218,6 +214,29 @@ function saveCalculate(dataLoad,action,sessionId) {
         }
     });
 }
+
+function checkCalculate(dataLoad,action,sessionId) {
+    console.log('display paths');
+    console.log(dataLoad);
+    $.ajax({
+        url: serviceURL +action + "&sessionId="+sessionID,
+        type: 'GET',
+        crossDomain: true,
+        dataType: "json", // data type get back from server
+        data: {"data": JSON.stringify(dataLoad)}, //data sent to server
+        success: function (data, textStatus, jqXHR) {
+            if(checkResponse(data)){
+//                parseResult(data);
+                alert('checkCalculate(). Formuls calculate success');
+            }
+        },
+        error: function (jqXHR, textStatus, data) {
+            // добавить вывод корректной ошибки
+            alert('АХТУНГ!!:?!?!%* WTF : ' + data[0].error);
+        }
+    });
+}
+
 
     var items = [{
         "name": "table_12",
