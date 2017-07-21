@@ -71,7 +71,7 @@
 },
 {
             "name": "B_1",
-            "type": "long",
+            "type": "double",
             "value": 5000.500
 }
 ]
