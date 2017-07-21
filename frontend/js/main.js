@@ -221,6 +221,7 @@ $('#myModal').on('shown.bs.modal', function (event) {
 				  var tableColumns = sData.columns.map(c=>newTitle(c.name));
 				  
 				  var myTable = $('#example').DataTable({
+					  "ordering": false,
 					  "sPaginationType": "full_numbers",
 					  data: sData.value,
 					  columns: tableColumns,
@@ -364,7 +365,7 @@ $("#nav").on('click','.btnNav',function(e) {
 	}else{
 		newAgent.addClass("project");
 	}
-	var newSpan = $('<span>').attr('id', "span" + id + i).addClass(cl[id]);
+	var newSpan = $('<span>').attr('id', "span" + getRandomInt(1,10) + id ).addClass(cl[id]);
 	newAgent.text(id + i);
 	$('#workzone').append(newAgent);
 	$('#' + id + i).append("<br>");
@@ -373,7 +374,7 @@ $("#nav").on('click','.btnNav',function(e) {
 	if(id == "temp"){
 		$('#' + id + i).contextMenu(menuContextConfig,{triggerOn:'contextmenu'});
 	}
-	storageData[id + i] = new DataSourceEl(id + i, undefined, id, undefined, undefined, undefined);
+	storageData[id + i] = new DataSourceEl(id + i, undefined, id, undefined, undefined, undefined, undefined, true);
 
     addDraggableElementEndPoint(newAgent, id);
 	
@@ -555,7 +556,7 @@ var createOperationEl = function(el, onWorkZone, filter){
 		var newDiv = document.createElement("div");
 		newDiv.id = id;
 		
-		var newSpan = $('<span>').attr('id', "span" + id).addClass(arrIconsElement[el.type]);
+		var newSpan = $('<span>').attr('id', "span" + getRandomInt(1,20) + id).addClass(arrIconsElement[el.type]);
 		newDiv.className = "project absoluteEl"
 		$('#workzone').append(newDiv);
 		$('#' + id).append("<br>");
@@ -573,7 +574,7 @@ var createTempTableNumberEl = function(el, filter){
 	newDiv.id = id;
 	
 	
-	var newSpan = $('<span>').attr('id', "span" + id).addClass(arrIconsElement[el.type]);
+	var newSpan = $('<span>').attr('id', "span" + getRandomInt(1,20) + id).addClass(arrIconsElement[el.type]);
 					
 	if(el.isWorkZone){
 		newDiv.className = " tableNumber absoluteEl" + (type === 'temp' ? " tempOps" : "");
@@ -604,7 +605,7 @@ var createTempTableNumberEl = function(el, filter){
 			var idI = id + i;
 			i++;
 			var newAgentExt = $('<div>').attr('id', idI).addClass('tableNumber').addClass('absoluteEl');
-			var newSpanExt = $('<span>').attr('id', "span" + idI).addClass(arrIconsElement[storageData[id].type]);
+			var newSpanExt = $('<span>').attr('id', "span" + getRandomInt(1,20) + idI).addClass(arrIconsElement[storageData[id].type]);
 			newAgentExt.text(idI + '(' + id + ')');
 							
 			$('#workzone').append(newAgentExt);
@@ -631,6 +632,12 @@ var createTempTableNumberEl = function(el, filter){
 	//добавили контекстное меню
 	$('#' + id).contextMenu(menuContextConfig,{triggerOn:'contextmenu'});
 };
+
+function getRandomInt(min, max)
+{
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
   
 //=====================================
 
@@ -676,7 +683,7 @@ var dataTest = [{
 	},
 	"formula": "t->temp2"
 }];
-
+/*
 var parseResult = function(data){
 	//завершим, если не массив
 	if(data === undefined || !Array.isArray(data))
@@ -748,6 +755,98 @@ var parseResult = function(data){
 						var endpointSource = jsPlumb.getEndpoints($('#' + newId)).find(function(el, i, arr){return el.isSource;});
 						var endpointTarget = jsPlumb.getEndpoints($('#' + targetPoint)).find(function(el, i, arr){return el.isTarget;});
 						jsPlumb.connect({source: endpointSource, target: endpointTarget});
+					}
+				}
+			}else{//это result 1 раз пришел
+				createTempTableNumberEl(el["result"],{});
+				$('#' + el["result"].name).attr('title', el.formula);
+			}
+		}
+	});
+};
+*/
+
+var parseResult = function(data){
+	//завершим, если не массив
+	if(data === undefined || !Array.isArray(data))
+		return;
+	data.forEach(function(el, ii, arr){
+		if(el["result"] !== undefined && el["result"].name !== undefined){
+			var elStorage = storageData[el.result.name];
+			var id = el.result.name;
+			if(elStorage !== undefined){//если это temp или повторный result 
+				if(elStorage.source == undefined && elStorage.isWorkZone){//если temp на WorkZone и его 1 раз отправили
+					var newId = el.result.name + '_' + i;
+					    i++;
+						var indexRem = calcPath.findIndex(e=> e.source === id);
+						var sourcePoint, targetPoint;
+						if(indexRem > -1){
+							calcPath[indexRem].source = newId;
+							targetPoint = calcPath[indexRem].target;
+						}
+						
+						indexRem = calcPath.findIndex(e=> e.target === id);
+			
+						if(indexRem > -1){
+							calcPath[indexRem].target = newId;
+							sourcePoint = calcPath[indexRem].source;
+						}
+						
+						deleteEndPointsByElement($('#' + id), false);
+						
+						var span = $('#temp1 span');
+						$('#' + id).attr('id', newId);
+						
+						var copyElStorage = JSON.parse(JSON.stringify(elStorage));
+						copyElStorage["name"] = newId;
+						copyElStorage["source"] = id;
+						copyElStorage["type"] = "temp";
+						copyElStorage["columns"] = el["result"].columns;
+						copyElStorage["value"] = undefined;
+						copyElStorage["filter"] = {};
+						storageData[newId] = copyElStorage;
+						
+						createTempTableNumberEl(el["result"],{});
+						$('#' + newId).text(newId + '(' + id + ')');
+						$('#' + newId).append("<br>");
+						$('#' + newId).append(span)
+						$('#' + id).attr('title', el.formula);
+
+						
+						
+						addDraggableElementEndPoint($('#' + newId), el["result"].type);
+						
+						if(sourcePoint !== undefined){
+							var endpointSource = jsPlumb.getEndpoints($('#' + sourcePoint)).find(function(el, i, arr){return el.isSource;});
+							var endpointTarget = jsPlumb.getEndpoints($('#' + newId)).find(function(el, i, arr){return el.isTarget;});
+							jsPlumb.connect({source: endpointSource, target: endpointTarget});
+						}
+						
+						if(targetPoint !== undefined){
+							var endpointSource = jsPlumb.getEndpoints($('#' + newId)).find(function(el, i, arr){return el.isSource;});
+							var endpointTarget = jsPlumb.getEndpoints($('#' + targetPoint)).find(function(el, i, arr){return el.isTarget;});
+							jsPlumb.connect({source: endpointSource, target: endpointTarget});
+						}
+				}else{
+					
+					if(elStorage.source == undefined){//повторный result
+						elStorage["type"] = "temp";
+						elStorage["columns"] = el["result"].columns;
+						elStorage["value"] = el["result"].value;
+						elStorage["filter"] = {};
+					}else{//temp уже отправляли, обновим temp и source
+						elStorage["type"] = "temp";
+						elStorage["columns"] = el["result"].columns;
+						elStorage["value"] = undefined;
+						elStorage["filter"] = {};
+						var elParentStorage = storageData[storageData[id].source];
+						if(elParentStorage !== undefined){
+							elParentStorage["type"] = el["result"].type;
+							elParentStorage["columns"] = el["result"].columns;
+							elParentStorage["value"] = el["result"].value;
+							elParentStorage["filter"] = {};
+							$('#' + elParentStorage.name).attr('title', el.formula);
+						}
 					}
 				}
 			}else{//это result 1 раз пришел
