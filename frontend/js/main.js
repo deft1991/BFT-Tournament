@@ -358,6 +358,9 @@ $("#nav").on('click','.btnNav',function(e) {
 	cl["mul"] = "glyphicon glyphicon-remove";
 	cl["div"] = "glyphicon glyphicon-italic";
 	cl["temp"] = "glyphicon glyphicon-search";
+	
+	while(storageData[id + i] !== undefined)
+		i++;
 
 	var newAgent = $('<div>').attr('id', id + i).addClass('absoluteEl');
 	if(id == "temp"){
@@ -365,7 +368,7 @@ $("#nav").on('click','.btnNav',function(e) {
 	}else{
 		newAgent.addClass("project");
 	}
-	var newSpan = $('<span>').attr('id', "span" + getRandomInt(1,10) + id ).addClass(cl[id]);
+	var newSpan = $('<span>').attr('id', "span" + id  + i).addClass(cl[id]);
 	newAgent.text(id + i);
 	$('#workzone').append(newAgent);
 	$('#' + id + i).append("<br>");
@@ -556,9 +559,10 @@ var createOperationEl = function(el, onWorkZone, filter){
 		var newDiv = document.createElement("div");
 		newDiv.id = id;
 		
-		var newSpan = $('<span>').attr('id', "span" + getRandomInt(1,20) + id).addClass(arrIconsElement[el.type]);
+		var newSpan = $('<span>').attr('id', "span" + getRandomInt(1000,10000) + id).addClass(arrIconsElement[el.type]);
 		newDiv.className = "project absoluteEl"
 		$('#workzone').append(newDiv);
+		$('#' + id).text(id);
 		$('#' + id).append("<br>");
 		$('#' + id).append(newSpan);
 		$('#' + id).css({top: el.position.dy, left: el.position.dx}); 
@@ -574,7 +578,7 @@ var createTempTableNumberEl = function(el, filter){
 	newDiv.id = id;
 	
 	
-	var newSpan = $('<span>').attr('id', "span" + getRandomInt(1,20) + id).addClass(arrIconsElement[el.type]);
+	var newSpan = $('<span>').attr('id', "span" + getRandomInt(1000,200000) + id).addClass(arrIconsElement[el.type]);
 					
 	if(el.isWorkZone){
 		newDiv.className = " tableNumber absoluteEl" + (type === 'temp' ? " tempOps" : "");
@@ -602,10 +606,12 @@ var createTempTableNumberEl = function(el, filter){
 		newDiv.onclick = function(e) {
 			
 			var id = e.currentTarget.getAttribute("id");
+			while(storageData[id + i] !== undefined)
+				i++;
 			var idI = id + i;
 			i++;
 			var newAgentExt = $('<div>').attr('id', idI).addClass('tableNumber').addClass('absoluteEl');
-			var newSpanExt = $('<span>').attr('id', "span" + getRandomInt(1,20) + idI).addClass(arrIconsElement[storageData[id].type]);
+			var newSpanExt = $('<span>').attr('id', "span" + getRandomInt(1000000,2000000) + idI).addClass(arrIconsElement[storageData[id].type]);
 			newAgentExt.text(idI + '(' + id + ')');
 							
 			$('#workzone').append(newAgentExt);
@@ -776,6 +782,8 @@ var parseResult = function(data){
 			var id = el.result.name;
 			if(elStorage !== undefined){//если это temp или повторный result 
 				if(elStorage.source == undefined && elStorage.isWorkZone){//если temp на WorkZone и его 1 раз отправили
+						while(storageData[el.result.name + '_' + i] !== undefined)
+							i++;
 					var newId = el.result.name + '_' + i;
 					    i++;
 						var indexRem = calcPath.findIndex(e=> e.source === id);
