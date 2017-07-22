@@ -5,6 +5,22 @@ function СalcPathEl(source, target, type){
 	this.target = target;
 	this.type = type;
 }
+
+var anEndpointSource = {
+        endpoint: "Dot",
+        isSource: true,
+        isTarget: false,
+        maxConnections: 1,
+        anchor: [0.95,0.5,0,0]
+    };
+
+var anEndpointDestination = {
+        endpoint: "Dot",
+        isSource: false,
+        isTarget: true,
+        maxConnections: 1,
+        anchor: [0,0.5,0,0]
+    };
 		
 jsPlumb.ready(function() {
 
@@ -84,26 +100,6 @@ var deleteEndPointsByElement = function(el, isDeleteElem){
 		el.remove();
 	}
 };
-
-
-
-
-
-var anEndpointSource = {
-        endpoint: "Dot",
-        isSource: true,
-        isTarget: false,
-        maxConnections: 1,
-        anchor: [0.95,0.5,0,0]
-    };
-
-var anEndpointDestination = {
-        endpoint: "Dot",
-        isSource: false,
-        isTarget: true,
-        maxConnections: 1,
-        anchor: [0,0.5,0,0]
-    };
 			
 var addDraggableElementEndPoint = function(el, type){
 	jsPlumb.draggable(el, {

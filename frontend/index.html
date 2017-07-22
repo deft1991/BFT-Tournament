@@ -16,7 +16,6 @@
     <link rel="stylesheet" href="https://cdn.datatables.net/select/1.1.2/css/select.dataTables.min.css"/>
     <link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.0.2/css/responsive.dataTables.min.css"/> 
 	  
-	<!-- <script src="https://code.jquery.com/jquery-2.2.3.min.js"></script> -->
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
     <script src="https://cdn.datatables.net/1.10.11/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/buttons/1.1.2/js/dataTables.buttons.min.js"></script>
@@ -25,23 +24,15 @@
 	
 	
 	
-	<script type="text/javascript" src="js/FileSaver.min.js"></script>
-	<script type="text/javascript" src="js/dataTables.js"></script>
-	<!-- <script src="js/bootstrap/js/bootstrap.js"></script> -->
-	<script src="js/contextMenu/contextMenu.js"></script>
+	<!--<script type="text/javascript" src="lib/dataTables.js"></script>-->
+	<script src="lib/contextMenu/contextMenu.js"></script>
+	<link href="lib/contextMenu/contextMenu.css" rel="stylesheet" type="text/css"/>
+	<script src="lib/FileSaver.min.js"></script>
+	<script src="js/rest.js"></script>
 	<script src="js/plumb.js"></script>
-	<script src="js/FileSaver.min.js"></script>
 	<script src="js/main.js"></script>
-	
-	
-	
-	
-	
 	<link href="css/main.css"  rel="stylesheet" type="text/css">
-	<!-- <link href="js/bootstrap/css/bootstrap.css" rel="stylesheet" type="text/css"/> -->
-	<!-- <link href="js/bootstrap/css/bootstrap-theme.css" rel="stylesheet" type="text/css"/> -->
-	<link href="js/contextMenu/contextMenu.css" rel="stylesheet" type="text/css"/>
-	<!-- <link href="https://cdn.datatables.net/v/dt/dt-1.10.15/datatables.min.css" rel="stylesheet" type="text/css"/> -->
+	
 </head>
 <body style="padding-top:10px" onload="Init()">
 
@@ -127,129 +118,3 @@
 </div>
 </body>
 </html>
-<script>
-//    var serviceURL = "http://localhost:6060/servletexam/mainServlet?action=start_service";
-    var serviceURL = "http://localhost:6060/servletexam/mainServlet?action=";
-
-    function getPaths() {
-        console.log('display paths');
-        var name = JSON.stringify(items);
-        console.log(name);
-        $.ajax({
-            url: serviceURL + "start_service",
-            type: 'GET',
-            crossDomain: true,
-            dataType: "json", // data type get back from server
-            data: {"data": name}, //data sent to server
-            success: function (data, textStatus, jqXHR) {
-				if(checkResponse(data)){
-					sessionID = data[0].sessionId;
-                alert('getPaths created successfully. SessionID = ' + data[0] );
-				}
-            },
-            error: function (jqXHR, textStatus, errorThrown) {
-                alert('Path Finder : ' + textStatus);
-            }
-        });
-    }
-var sessionID;
-
-    function saveLoadData(dataLoad,action,sessionId) {
-        console.log('display paths');
-        console.log(dataLoad);
-        $.ajax({
-            url: serviceURL +action + "&sessionId="+sessionID,
-            type: 'GET',
-            crossDomain: true,
-            dataType: "json", // data type get back from server
-            data: {"data": JSON.stringify(dataLoad)}, //data sent to server
-            success: function (data, textStatus, jqXHR) {
-				if(checkResponse(data)){
-                    sessionID = data[0].sessionId;
-					alert('saveLoadData(). SessionID = ' +sessionID);
-					$("#validate").prop('disabled', false);
-					$("#run").prop('disabled', false);
-				}
-            },
-            error: function (jqXHR, textStatus, data) {
-                alert('Path Finder : ' + data[0].error);
-            }
-        });
-    }
-	
-    function updateData(dataLoad,action,sessionId) {
-        console.log('updateData(dataLoad,action,sessionId): ' + dataLoad);
-        $.ajax({
-            url: serviceURL +action + "&sessionId="+sessionID,
-            type: 'GET',
-            crossDomain: true,
-            dataType: "json", 
-            data: {"data": JSON.stringify(dataLoad)},
-            success: function (data, textStatus, jqXHR) {
-				alert('updateData. Update succsess. ' +data[0].value);
-            },
-            error: function (jqXHR, textStatus, errorThrown) {
-                alert('Path Finder : ' + textStatus);
-            }
-        });
-    }
-function saveCalculate(dataLoad,action,sessionId) {
-    console.log('display paths');
-    console.log(dataLoad);
-    $.ajax({
-        url: serviceURL +action + "&sessionId="+sessionID,
-        type: 'GET',
-        crossDomain: true,
-        dataType: "json", // data type get back from server
-        data: {"data": JSON.stringify(dataLoad)}, //data sent to server
-        success: function (data, textStatus, jqXHR) {
-            if(checkResponse(data)){
-				parseResult(data);
-				alert('saveCalculate(). Formuls calculate success');
-			}
-        },
-        error: function (jqXHR, textStatus, data) {
-            // добавить вывод корректной ошибки
-            alert('АХТУНГ!!:?!?!%* WTF : ' + data[0].error);
-        }
-    });
-}
-
-function checkCalculate(dataLoad,action,sessionId) {
-    console.log('display paths');
-    console.log(dataLoad);
-    $.ajax({
-        url: serviceURL +action + "&sessionId="+sessionID,
-        type: 'GET',
-        crossDomain: true,
-        dataType: "json", // data type get back from server
-        data: {"data": JSON.stringify(dataLoad)}, //data sent to server
-        success: function (data, textStatus, jqXHR) {
-            if(checkResponse(data)){
-//                parseResult(data);
-                alert('checkCalculate(). Formuls calculate success');
-            }
-        },
-        error: function (jqXHR, textStatus, data) {
-            // добавить вывод корректной ошибки
-            alert('АХТУНГ!!:?!?!%* WTF : ' + data[0].error);
-        }
-    });
-}
-
-
-    var items = [{
-        "name": "table_12",
-        "datatype": "table",
-        "value": [
-            [ "Tiger Nixon", "System Architect", "Edinburgh", "5421", "2011-04-25", "320.800" ],
-            [ "Garrett Winters", "Accountant", "Tokyo", "8422", "2011-07-25", "170.750" ]
-        ],
-        "columns": [
-            {"name": "Name","type": "string"},{"name": "Position","type": "string"},
-            {"name": "Office","type": "string"},{"name": "Extn","type": "long"},
-            {"name": "StartDate","type": "date"},{"name": "Salary","type": "double"}
-        ]
-        }];
-
-</script>

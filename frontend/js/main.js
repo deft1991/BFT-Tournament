@@ -1,7 +1,4 @@
-var i =1;
-
-
-
+var storageData = {};
 var menuContextConfig = [{
         name: 'update',
         img: 'img/add.png',
@@ -33,81 +30,53 @@ var formElementToTransfer = function(el){
 	return resData;
 }
 
-var formElementToTransferLoad = function(el){
-	
-	var resData = {};
-	resData["name"] = el.name;
-	resData["type"] = el.type;
-	
-	if(el.source !== undefined){
-	   resData["source"] = el.source;
-	}else{
-		resData["value"] = el.value;
-	}
-	if(el.type === "table"){
-		el["columns"] = el.columns;
-	}
-	return resData;
-}
-	
 	
 var filtersModal = {};
 var filters = [];
 var sources = [];
 var getTableFilter = function(){
 	var id = $('#elementId').val();
-	if(storageData[id] !== undefined){	
+	if(storageData[id] !== undefined){
+		var sData = storageData[id].source == undefined ? storageData[id] : storageData[storageData[id].source];	
 		switch(storageData[id].type){
 			case "table":
 			case "temp":
-			var sData = storageData[id].source == undefined ? storageData[id] : storageData[storageData[id].source];
-			var data = Array.from($('#example').DataTable().data());
-			sData.value = data;
-			//обновим на сервере
-			updateData(
-			formElementToTransfer(sData),
-			"save_data",
-			sessionID
-			);
-			if(storageData[id].filter !== undefined){
-				Object.keys(storageData[id].filter).forEach(function(key, i){
-					var item = storageData[id].filter[key];
-					if(item !== undefined){
-						var val = $('#' + key).val();
-						val = val === undefined ? '' : val;
-						var foundCmpSymbols = val.includes('>') || val.includes('<') || val.includes('=');
-						var ops = foundCmpSymbols ? val.substr(0, 1) : '';
-						val = foundCmpSymbols ? val.substr(1, val.length - 1) : val;
-						item.value = (item.type === 'datetime' ? normalizeDate(val) : val);
-						item.operation = ops;
-						if(val !== ''){
-							if(item.operation !== ''){
-								
-								filters.push(id + '.' + key + item.operation + ((item.type === 'string' || item.type === 'datetime') ? '"' + item.value + '"': item.value));
-							}else{
-								// filters.push('CAST(' + id + '.' + key  + ' as varchar) like "%'+ item.value + '%"');
-								filters.push({id : item.value});
-							}
-						}
-					}		
-				});
-			}
-			alert('[' + filters.join(' AND ') + ']');
+				var data = Array.from($('#tableData').DataTable().data());
+				sData.value = data;
+				//обновим на сервере
+				updateData(formElementToTransfer(sData),"save_data",sessionID);
+				$('#myModal').modal('hide');
 			break;
 			case "long":
+				var newValue = $('#input_' + sData.name).val();
+				
+				if(isInt(newValue)){
+					sData.value = $('#input_' + sData.name).val();
+					//обновим на сервере
+					updateData(formElementToTransfer(sData),"save_data",sessionID);
+					$('#myModal').modal('hide');
+				}else{
+					alert('Значение не соответствует типу long');
+				}
+			break;
 			case "double":
-			    var sData = storageData[id].source == undefined ? storageData[id] : storageData[storageData[id].source];
-				sData.value = $('#input_' + sData.name).val();
-				//обновим на сервере
-				updateData(
-				formElementToTransfer(sData),
-				"save_data",
-				sessionID
-				);
+			//case "date": на будующее 
+				var newValue = $('#input_' + sData.name).val();
+				
+				if(isFloat(newValue)){
+					sData.value = $('#input_' + sData.name).val();
+					//обновим на сервере
+					updateData(formElementToTransfer(sData),"save_data",sessionID);
+					$('#myModal').modal('hide');
+				}else{
+					alert('Значение не соответствует типу double');
+				}
 			break;
 		}
+	}else{
+		$('#myModal').modal('hide');
 	}
-	$('#myModal').modal('hide');
+	
 };
 
 var normalizeDate = function(dateString) {
@@ -135,7 +104,7 @@ var saveCurrentState = function(){
 		exportData.push(clNode);
 	});
 	
-	var blob = new Blob([JSON.stringify(exportData)], {type: "application/json"});
+	var blob = new Blob([JSON.stringify(exportData, null, 4)], {type: "application/json"});
 
 	var saveAs = window.saveAs;
 	saveAs(blob, 'exportSchema_' + (new Date().toLocaleString() +'.json'));
@@ -150,6 +119,7 @@ var Init = function(){
 $("#validate").prop('disabled', true);
 $("#run").prop('disabled', true);
 $("#sendData").prop('disabled', true);
+$("#save").prop('disabled', true);
 	
 $('#filterAccept').click(getTableFilter);
 
@@ -163,7 +133,7 @@ $('#myModal').on('shown.bs.modal', function (event) {
 });
 
     function createFilters(val, newTable) {
-        var thead = $('#example thead');
+        var thead = $('#tableData thead');
 		var trForInput = $('<tr>');
 		thead.append(trForInput);
         newTable.append(thead);
@@ -184,7 +154,7 @@ $('#myModal').on('shown.bs.modal', function (event) {
 				}else{
 					var newValue = storageData[val].filter[colName].operation + storageData[val].filter[colName].value;
 					thInput.val(newValue);
-					$("#example").dataTable().fnFilter((storageData[val].filter[colName].operation !== '' ? '' : newValue), storageData[val].filter[colName].index);
+					$("#tableData").dataTable().fnFilter((storageData[val].filter[colName].operation !== '' ? '' : newValue), storageData[val].filter[colName].index);
 				}
 				$('#' + colName).keyup(function() {
 				 var valEl = $('#elementId').val();
@@ -194,7 +164,7 @@ $('#myModal').on('shown.bs.modal', function (event) {
 					var foundCmpSymbols = val.includes('>') || val.includes('<') || val.includes('=');
 					//indexFilter.value = foundCmpSymbols ? val.substr(1, val.length - 1) : val;
 					//indexFilter.operation = foundCmpSymbols ? val[0] : '';
-					$("#example").dataTable().fnFilter((foundCmpSymbols ? '' : $(this).val()), indexFilter.index);
+					$("#tableData").dataTable().fnFilter((foundCmpSymbols ? '' : $(this).val()), indexFilter.index);
 				 } 
 				});
             }
@@ -209,10 +179,10 @@ $('#myModal').on('shown.bs.modal', function (event) {
   
   var newDiv = $('<div>').attr('id', "div" + val);
 
-  var newTable = $('<table>').attr('id', "example").addClass("display");
+  var newTable = $('<table>').attr('id', "tableData").addClass("display");
   newDiv.append(newTable);
   newDiv.appendTo('#modal-body');
-  $('#example')[0].style.width = "100%";
+  $('#tableData')[0].style.width = "100%";
   if(storageData[val] !== undefined){//временное условие, для открытия temp таблиц
 	  var sData = storageData[val].source == undefined ? storageData[val] : storageData[storageData[val].source];
 	  switch(sData.type){
@@ -220,7 +190,7 @@ $('#myModal').on('shown.bs.modal', function (event) {
 				  function newTitle(x){var el = {title: x}; return el;}
 				  var tableColumns = sData.columns.map(c=>newTitle(c.name));
 				  
-				  var myTable = $('#example').DataTable({
+				  var myTable = $('#tableData').DataTable({
 					  "ordering": false,
 					  "sPaginationType": "full_numbers",
 					  data: sData.value,
@@ -249,7 +219,7 @@ $('#myModal').on('shown.bs.modal', function (event) {
 		  break;
 		  	case "long":
 			case "double":
-			$("#example").html('<tr><td align="center"><input id="input_'+ sData.name +'" type="text" value="'+ sData.value +'" style="width:100%"></input><td></tr>');
+			$("#tableData").html('<tr><td align="center"><input id="input_'+ sData.name +'" type="text" value="'+ sData.value +'" style="width:100%"></input><td></tr>');
 		  break;
 	  }
   }
@@ -299,7 +269,7 @@ $('#myModal').on('shown.bs.modal', function (event) {
 								compareString(value, aData[inputFilters[i].iColumn]);
 							}
 							break;
-						case 'datetime':
+						case 'date':
 							if (value && match) {
 								compareDateTime(value, aData[inputFilters[i].iColumn]);
 							}
@@ -358,7 +328,7 @@ $("#nav").on('click','.btnNav',function(e) {
 	cl["mul"] = "glyphicon glyphicon-remove";
 	cl["div"] = "glyphicon glyphicon-italic";
 	cl["temp"] = "glyphicon glyphicon-search";
-	
+	var i = 1;
 	while(storageData[id + i] !== undefined)
 		i++;
 
@@ -380,8 +350,6 @@ $("#nav").on('click','.btnNav',function(e) {
 	storageData[id + i] = new DataSourceEl(id + i, undefined, id, undefined, undefined, undefined, undefined, true);
 
     addDraggableElementEndPoint(newAgent, id);
-	
-    i++;
 		
   });
 
@@ -419,7 +387,115 @@ function DataSourceEl(name, source, type, columns, value, filter, target, isWork
 	this.isWorkZone = isWorkZone;
 }	
 
-var storageData = {};
+var validateSourceFile = function(data){
+		//далее идем если там массив
+		if(data === undefined || !Array.isArray(data) || data.length < 1)
+			throw "Некорректная структура файла";
+		var source = {};
+		var ElementTypes = ["mul", "div","sub","add","double","long","table","temp"];
+		var ValueTypes = ["double","long","string", "date"];	
+		data.sort(function(a,b){//сначала обработаем источники
+					if(a.source !== undefined && b.source === undefined){
+						return 1;
+					}else{
+						return -1;
+					}
+				}).forEach(function(el, index, data){
+			//проверка на тип
+			if(el.type === undefined || !ElementTypes.includes(el.type))
+				throw "Неизвестный тип: " + e1.type;
+			
+			//проверка на название
+			if(el.name === undefined || source[el.name] !== undefined)
+				throw "Наименование не указано или не уникально: " + el.name;
+			source[el.name] = {};
+			source[el.name].type = el.type;
+			source[el.name].name = el.name;
+			//проверка на source
+			if(el.source !== undefined && (source[el.source] === undefined || source[el.source].type !== el.type)){
+				throw "Отсутствует описание родительского элемента: " + el.source;
+			}
+			source[el.name].source = el.source;
+			
+			if(el.type === "table"){
+				if(el.columns === undefined || !Array.isArray(el.columns))
+					throw "У таблицы " + el.name + " нет описания столбцов";
+				
+				if(el.value !== undefined && el.columns != undefined){
+					el.columns.forEach(function(eColumn,iColumn, arrColumn){
+						if(eColumn.name === undefined || eColumn.type === undefined || !ValueTypes.includes(eColumn.type))
+							throw "Некорректное описание столбцов в таблице " + el.name;
+
+						for(index = 0;index < el.value.length; index++){
+							if(el.value[index].length != el.columns.length)
+								throw "Размерность таблицы не соответствует размерности содержимого: " + el.name;
+							
+							switch(eColumn.type){
+								case "date":
+									new Date(el.value[index][iColumn]);
+								break;
+								case "long":
+									if(!isInt(el.value[index][iColumn]))
+										throw "У таблицы " + el.name + " одно или несколько значений не соответствует типу " + eColumn.type;
+								break;
+								case "double":
+									if(!isFloat(el.value[index][iColumn]))
+										throw "У таблицы " + el.name + " одно или несколько значений не соответствует типу " + eColumn.type;
+								break;
+							}
+						}
+					});
+				}
+				if(el.filter !== undefined){
+					Object.keys(el.filter).forEach(function(eFilterKey){
+						var indexColumn = el.columns.findIndex(x=>x.name == eFilterKey);
+						if(indexColumn < 0)
+							throw "У таблицы " + el.name + "имеется фильтр для отсутствующего столбца " + eFilterKey;
+							
+						var filterColumn = el.filter[eFilterKey];
+						if(filterColumn.type === undefined || filterColumn.type !== el.columns[indexColumn].type)
+							throw "У таблицы " + el.name + "имеется тип фильтра для столбца " + eFilterKey + " не соответствует типу столбца";
+						var operation = ["-","+","*","/",""];
+						if(filterColumn.operation === undefined || !operation.includes(filterColumn.operation))
+							throw "У колонки " + eFilterKey + " отсутствует или некорректно указан оператор сравнения";
+						
+					});
+				}
+			}else{
+				if(el.columns !== undefined || ( el.value !== undefined && Array.isArray(el.value)))
+					throw "У элемента " + el.name + "метаданные или значение не соответствуют типу";
+				if(el.source === undefined){
+					switch(el.type){
+						case "date":
+							new Date(el.value);
+						break;
+						case "long":
+							if(!Number.isInteger(el.value))
+								throw "У элемента " + el.name + " значение не соответствует типу " + el.type;
+						break;
+						case "double":
+							if(!isFloat(el.value))
+								throw "У элемента " + el.name + " значение не соответствует типу " + el.type;
+							break;
+					}
+				}
+			}
+			
+			if(el.position !== undefined){
+				if(el.position.dx === undefined || el.position.dy === undefined){
+					throw "Ошибка в метаданных позиционирования объекта";
+				}
+					if(!isFloat(el.position.dx))
+						throw "Некорректная позиция dx объекта " + el.name;
+					if(!isFloat(el.position.dy))
+						throw "Некорректная позиция dy объекта " + el.name;
+				
+			}
+			if(el.isWorkZone !== undefined && (el.isWorkZone !== true && el.isWorkZone !== false)){
+				throw "Некорректное значение у параметра isWorkZone: " + el.name;
+			}
+		});
+};
 
 var previewFile = function(){
         var file = document.querySelector('input[type=file]').files[0];
@@ -429,6 +505,9 @@ var previewFile = function(){
         console.log(reader.result);
 		try{
             var data = JSON.parse(reader.result);
+			
+			//проверка на структуру входного файла
+			validateSourceFile(data);
 			
 			
 			Object.keys(storageData).forEach(function(item, i, arr){ 
@@ -496,27 +575,35 @@ var previewFile = function(){
 					}
 	
             });
-			//теперь можно отправлять данные на сервер
-			$("#sendData").prop('disabled', true);
-			
+
 			//устанавливаем связи
 			Object.keys(storageData).forEach(function(key){
 				if(storageData[key].target !== undefined 
 				&& storageData[key].isWorkZone){
 					
-					var endpointSource = jsPlumb.getEndpoints($('#' + key)).find(function(el, i, arr){return el.isSource;});
-					var endpointTarget = jsPlumb.getEndpoints($('#' + storageData[key].target)).find(function(el, i, arr){return el.isTarget;});
-					
-					jsPlumb.connect({source: endpointSource, target: endpointTarget});
+					var endpointsSource = jsPlumb.getEndpoints($('#' + key));
+					var endpointsTarget = jsPlumb.getEndpoints($('#' + storageData[key].target));
+					if(endpointsSource !== undefined && endpointsTarget !== undefined){
+						var sourceIndex = endpointsSource.findIndex( el=> el.isSource);
+						var targetIndex = endpointsTarget.findIndex( el=> el.isTarget);
+						
+						jsPlumb.connect({source: endpointsSource[sourceIndex], target: endpointsTarget[targetIndex]});
+					}else{
+						//обработать ошибку
+					}
 				}
 			});
+			//теперь можно отправлять данные на сервер и сохранять состояние
 			$("#sendData").prop('disabled', false);
+			$("#save").prop('disabled', false);
 			$('input[type=file]').val('');
 		}catch(e){
 			alert('Ошибка ' + e);
 			$("#sendData").prop('disabled', true);
 			$("#run").prop('disabled', true);
 			$("#validate").prop('disabled', true);
+			$("#save").prop('disabled', true);
+			$('input[type=file]').val('');
 		}
         }, false);
 
@@ -525,22 +612,7 @@ var previewFile = function(){
         }
     };
 	
-var sendDataToServer = function(){
-	var dataToSend = [];
-    Object.keys(storageData).forEach(function(key){
-    if (storageData[key].source === undefined){
-        //dataToSend.push(formElementToTransferLoad(storageData[key]));
-		dataToSend.push(storageData[key]);
-    }
-    });
-    try{
-		saveLoadData(dataToSend,"start_service",sessionID );
-	}catch(e){
-		alert('Ошибка ' + e.name + ":" + e.message + "\n" + e.stack);
-	}
-};
-	
-  
+
 //=========создание элемента===========
 var arrIconsElement = {};
 	arrIconsElement["add"] = "glyphicon glyphicon-plus";
@@ -559,7 +631,7 @@ var createOperationEl = function(el, onWorkZone, filter){
 		var newDiv = document.createElement("div");
 		newDiv.id = id;
 		
-		var newSpan = $('<span>').attr('id', "span" + getRandomInt(1000,10000) + id).addClass(arrIconsElement[el.type]);
+		var newSpan = $('<span>').attr('id', "span" + id).addClass(arrIconsElement[el.type]);
 		newDiv.className = "project absoluteEl"
 		$('#workzone').append(newDiv);
 		$('#' + id).text(id);
@@ -578,9 +650,9 @@ var createTempTableNumberEl = function(el, filter){
 	newDiv.id = id;
 	
 	
-	var newSpan = $('<span>').attr('id', "span" + getRandomInt(1000,200000) + id).addClass(arrIconsElement[el.type]);
+	var newSpan = $('<span>').attr('id', "span" + id).addClass(arrIconsElement[el.type]);
 					
-	if(el.isWorkZone){
+	if(el.isWorkZone && el.source !== undefined){
 		newDiv.className = " tableNumber absoluteEl" + (type === 'temp' ? " tempOps" : "");
 		var dataParent = storageData[el.source];
 		if(dataParent !== undefined){
@@ -606,12 +678,12 @@ var createTempTableNumberEl = function(el, filter){
 		newDiv.onclick = function(e) {
 			
 			var id = e.currentTarget.getAttribute("id");
+			var i = 1;
 			while(storageData[id + i] !== undefined)
 				i++;
 			var idI = id + i;
-			i++;
 			var newAgentExt = $('<div>').attr('id', idI).addClass('tableNumber').addClass('absoluteEl');
-			var newSpanExt = $('<span>').attr('id', "span" + getRandomInt(1000000,2000000) + idI).addClass(arrIconsElement[storageData[id].type]);
+			var newSpanExt = $('<span>').attr('id', "span" + idI).addClass(arrIconsElement[storageData[id].type]);
 			newAgentExt.text(idI + '(' + id + ')');
 							
 			$('#workzone').append(newAgentExt);
@@ -639,139 +711,6 @@ var createTempTableNumberEl = function(el, filter){
 	$('#' + id).contextMenu(menuContextConfig,{triggerOn:'contextmenu'});
 };
 
-function getRandomInt(min, max)
-{
-  return Math.floor(Math.random() * (max - min + 1)) + min;
-}
-
-  
-//=====================================
-
-var dataTest = [{
-	"result": {
-		"type": "table",
-		"name": "temp1",
-		"columns": [{
-			"name": "result_0_0",
-			"type": "long"
-		}, {
-			"name": "result_0_1",
-			"type": "long"
-		}, {
-			"name": "result_0_2",
-			"type": "long"
-		}],
-		"value": [
-			[2, 4, 6],
-			[8, 10, 12],
-			[14, 16, 18]
-		],
-		
-	},
-	"formula": "t11+table_1->temp1"
-}, {
-	"result": {
-	    "name": "result11",
-		"type": "table",
-		"columns": [{
-			"name": "c1",
-			"type": "long"
-		}, {
-			"name": "c2",
-			"type": "long"
-		}, {
-			"name": "c3",
-			"type": "long"
-		}],
-		"value": [
-			[4, 5, 6]
-		],
-	},
-	"formula": "t->temp2"
-}];
-/*
-var parseResult = function(data){
-	//завершим, если не массив
-	if(data === undefined || !Array.isArray(data))
-		return;
-	data.forEach(function(el, i, arr){
-		if(el["result"] !== undefined && el["result"].name !== undefined){
-			var elStorage = storageData[el.result.name];
-			if(elStorage !== undefined){//если это temp или повторный result 
-				var id = el.result.name;
-				if(id.includes('ZZZ')){//если уже отправляли, тогда обновим
-					elStorage["type"] = "temp";
-					elStorage["columns"] = el["result"].columns;
-					elStorage["value"] = el["result"].value;
-					elStorage["filter"] = {};
-					var elParentStorage = storageData[storageData[id].source];
-					if(elParentStorage !== undefined){
-						elParentStorage["type"] = el["result"].type;
-						elParentStorage["columns"] = el["result"].columns;
-						elParentStorage["value"] = el["result"].value;
-						elParentStorage["filter"] = {};
-						$('#' + elParentStorage.name).attr('title', el.formula);
-					}
-					
-				}else{//иначе создадим родителя
-					var newId = el.result.name + "ZZZ";
-					
-					var indexRem = calcPath.findIndex(e=> e.source === id);
-					var sourcePoint, targetPoint;
-					if(indexRem > -1){
-						calcPath[indexRem].source = newId;
-						targetPoint = calcPath[indexRem].target;
-					}
-					
-					indexRem = calcPath.findIndex(e=> e.target === id);
-		
-					if(indexRem > -1){
-						calcPath[indexRem].target = newId;
-						sourcePoint = calcPath[indexRem].source;
-					}
-					
-					deleteEndPointsByElement($('#' + id), false);
-					
-					$('#' + id).attr('id', newId);
-					
-					var copyElStorage = JSON.parse(JSON.stringify(elStorage));
-					copyElStorage["name"] = newId;
-					copyElStorage["source"] = id;
-					copyElStorage["type"] = "temp";
-					copyElStorage["columns"] = el["result"].columns;
-					copyElStorage["value"] = undefined;
-					copyElStorage["filter"] = {};
-					storageData[newId] = copyElStorage;
-					
-					createTempTableNumberEl(el["result"],{});
-					$('#' + newId).text(newId + '(' + id + ')');
-					$('#' + id).attr('title', el.formula);
-
-					
-					
-					addDraggableElementEndPoint($('#' + newId), el["result"].type);
-					
-					if(sourcePoint !== undefined){
-						var endpointSource = jsPlumb.getEndpoints($('#' + sourcePoint)).find(function(el, i, arr){return el.isSource;});
-						var endpointTarget = jsPlumb.getEndpoints($('#' + newId)).find(function(el, i, arr){return el.isTarget;});
-						jsPlumb.connect({source: endpointSource, target: endpointTarget});
-					}
-					
-					if(targetPoint !== undefined){
-						var endpointSource = jsPlumb.getEndpoints($('#' + newId)).find(function(el, i, arr){return el.isSource;});
-						var endpointTarget = jsPlumb.getEndpoints($('#' + targetPoint)).find(function(el, i, arr){return el.isTarget;});
-						jsPlumb.connect({source: endpointSource, target: endpointTarget});
-					}
-				}
-			}else{//это result 1 раз пришел
-				createTempTableNumberEl(el["result"],{});
-				$('#' + el["result"].name).attr('title', el.formula);
-			}
-		}
-	});
-};
-*/
-
 var parseResult = function(data){
 	//завершим, если не массив
 	if(data === undefined || !Array.isArray(data))
@@ -782,59 +721,59 @@ var parseResult = function(data){
 			var id = el.result.name;
 			if(elStorage !== undefined){//если это temp или повторный result 
 				if(elStorage.source == undefined && elStorage.isWorkZone){//если temp на WorkZone и его 1 раз отправили
-						while(storageData[el.result.name + '_' + i] !== undefined)
-							i++;
+					var i = 1;
+					while(storageData[el.result.name + '_' + i] !== undefined)
+						i++;
 					var newId = el.result.name + '_' + i;
-					    i++;
-						var indexRem = calcPath.findIndex(e=> e.source === id);
-						var sourcePoint, targetPoint;
-						if(indexRem > -1){
-							calcPath[indexRem].source = newId;
-							targetPoint = calcPath[indexRem].target;
-						}
+					var indexRem = calcPath.findIndex(e=> e.source === id);
+					var sourcePoint, targetPoint;
+					if(indexRem > -1){
+						calcPath[indexRem].source = newId;
+						targetPoint = calcPath[indexRem].target;
+					}
 						
-						indexRem = calcPath.findIndex(e=> e.target === id);
+					indexRem = calcPath.findIndex(e=> e.target === id);
 			
-						if(indexRem > -1){
-							calcPath[indexRem].target = newId;
-							sourcePoint = calcPath[indexRem].source;
-						}
+					if(indexRem > -1){
+						calcPath[indexRem].target = newId;
+						sourcePoint = calcPath[indexRem].source;
+					}
 						
-						deleteEndPointsByElement($('#' + id), false);
+					deleteEndPointsByElement($('#' + id), false);
 						
-						var span = $('#temp1 span');
-						$('#' + id).attr('id', newId);
+					var span = $('#temp1 span');
+					$('#' + id).attr('id', newId);
 						
-						var copyElStorage = JSON.parse(JSON.stringify(elStorage));
-						copyElStorage["name"] = newId;
-						copyElStorage["source"] = id;
-						copyElStorage["type"] = "temp";
-						copyElStorage["columns"] = el["result"].columns;
-						copyElStorage["value"] = undefined;
-						copyElStorage["filter"] = {};
-						storageData[newId] = copyElStorage;
+					var copyElStorage = JSON.parse(JSON.stringify(elStorage));
+					copyElStorage["name"] = newId;
+					copyElStorage["source"] = id;
+					copyElStorage["type"] = "temp";
+					copyElStorage["columns"] = el["result"].columns;
+					copyElStorage["value"] = undefined;
+					copyElStorage["filter"] = {};
+					storageData[newId] = copyElStorage;
 						
-						createTempTableNumberEl(el["result"],{});
-						$('#' + newId).text(newId + '(' + id + ')');
-						$('#' + newId).append("<br>");
-						$('#' + newId).append(span)
-						$('#' + id).attr('title', el.formula);
+					createTempTableNumberEl(el["result"],{});
+					$('#' + newId).text(newId + '(' + id + ')');
+					$('#' + newId).append("<br>");
+					$('#' + newId).append(span)
+					$('#' + id).attr('title', el.formula);
 
 						
 						
-						addDraggableElementEndPoint($('#' + newId), el["result"].type);
+					addDraggableElementEndPoint($('#' + newId), el["result"].type);
 						
-						if(sourcePoint !== undefined){
-							var endpointSource = jsPlumb.getEndpoints($('#' + sourcePoint)).find(function(el, i, arr){return el.isSource;});
-							var endpointTarget = jsPlumb.getEndpoints($('#' + newId)).find(function(el, i, arr){return el.isTarget;});
-							jsPlumb.connect({source: endpointSource, target: endpointTarget});
-						}
+					if(sourcePoint !== undefined){
+						var endpointSource = jsPlumb.getEndpoints($('#' + sourcePoint)).find(function(el, i, arr){return el.isSource;});
+						var endpointTarget = jsPlumb.getEndpoints($('#' + newId)).find(function(el, i, arr){return el.isTarget;});
+						jsPlumb.connect({source: endpointSource, target: endpointTarget});
+					}
 						
-						if(targetPoint !== undefined){
-							var endpointSource = jsPlumb.getEndpoints($('#' + newId)).find(function(el, i, arr){return el.isSource;});
-							var endpointTarget = jsPlumb.getEndpoints($('#' + targetPoint)).find(function(el, i, arr){return el.isTarget;});
-							jsPlumb.connect({source: endpointSource, target: endpointTarget});
-						}
+					if(targetPoint !== undefined){
+						var endpointSource = jsPlumb.getEndpoints($('#' + newId)).find(function(el, i, arr){return el.isSource;});
+						var endpointTarget = jsPlumb.getEndpoints($('#' + targetPoint)).find(function(el, i, arr){return el.isTarget;});
+						jsPlumb.connect({source: endpointSource, target: endpointTarget});
+					}
 				}else{
 					
 					if(elStorage.source == undefined){//повторный result
@@ -865,12 +804,10 @@ var parseResult = function(data){
 	});
 };
 
-var checkResponse = function(response){
-	var err = response[0].error;
-	
-	if(err !== undefined){
-		alert(err);
-		return false;
-	}
-	return true;
+function isFloat(n){
+    return (!isNaN(parseFloat(n,10)) && parseFloat(n,10).toString(10) == n.toString(10));
+}
+
+function isInt(n){
+    return (!isNaN(parseInt(n,10)) && parseFloat(n,10).toString(10) == n.toString(10));
 }
