@@ -432,7 +432,8 @@ var validateSourceFile = function(data){
 							
 							switch(eColumn.type){
 								case "date":
-									new Date(el.value[index][iColumn]);
+								if(!isDate(el.value[index][iColumn]))
+									throw "У таблицы " + el.name + " одно или несколько значений не соответствует типу " + eColumn.type;
 								break;
 								case "long":
 									if(!isInt(el.value[index][iColumn]))
@@ -467,7 +468,8 @@ var validateSourceFile = function(data){
 				if(el.source === undefined){
 					switch(el.type){
 						case "date":
-							new Date(el.value);
+							if(!isDate(el.value))
+								throw "У элемента " + el.name + " значение не соответствует типу " + el.type;
 						break;
 						case "long":
 							if(!Number.isInteger(el.value))
@@ -809,5 +811,10 @@ function isFloat(n){
 }
 
 function isInt(n){
-    return (!isNaN(parseInt(n,10)) && parseFloat(n,10).toString(10) == n.toString(10));
+    return (!isNaN(parseInt(n,10)) && parseInt(n,10).toString(10) == n.toString(10));
+}
+
+function isDate (x) 
+{ 
+  return moment(x, 'YYYY-MM-DD', true).isValid();
 }
