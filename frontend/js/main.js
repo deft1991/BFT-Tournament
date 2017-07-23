@@ -418,7 +418,7 @@ var validateSourceFile = function(data){
 			source[el.name].source = el.source;
 			
 			if(el.type === "table"){
-				if(el.source === undefind && (el.columns === undefined || !Array.isArray(el.columns)))
+				if(el.source === undefined && (el.columns === undefined || !Array.isArray(el.columns)))
 					throw "У таблицы " + el.name + " нет описания столбцов";
 				
 				if(el.value !== undefined && el.columns != undefined){
