@@ -418,7 +418,7 @@ var validateSourceFile = function(data){
 			source[el.name].source = el.source;
 			
 			if(el.type === "table"){
-				if(el.columns === undefined || !Array.isArray(el.columns))
+				if(el.source === undefind && (el.columns === undefined || !Array.isArray(el.columns)))
 					throw "У таблицы " + el.name + " нет описания столбцов";
 				
 				if(el.value !== undefined && el.columns != undefined){
@@ -579,7 +579,7 @@ var previewFile = function(){
 			//устанавливаем связи
 			Object.keys(storageData).forEach(function(key){
 				if(storageData[key].target !== undefined 
-				&& storageData[key].isWorkZone){
+				&& (storageData[key].isWorkZone || storageData[key] !== undefined)){
 					
 					var endpointsSource = jsPlumb.getEndpoints($('#' + key));
 					var endpointsTarget = jsPlumb.getEndpoints($('#' + storageData[key].target));
@@ -652,7 +652,7 @@ var createTempTableNumberEl = function(el, filter){
 	
 	var newSpan = $('<span>').attr('id', "span" + id).addClass(arrIconsElement[el.type]);
 					
-	if(el.isWorkZone && el.source !== undefined){
+	if(el.isWorkZone || el.source !== undefined){
 		newDiv.className = " tableNumber absoluteEl" + (type === 'temp' ? " tempOps" : "");
 		var dataParent = storageData[el.source];
 		if(dataParent !== undefined){
