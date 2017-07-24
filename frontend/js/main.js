@@ -730,16 +730,16 @@ var parseResult = function(data){
 					var indexRem = calcPath.findIndex(e=> e.source === id);
 					var sourcePoint, targetPoint;
 					if(indexRem > -1){
-						calcPath[indexRem].source = newId;
+						// calcPath[indexRem].source = newId;
 						targetPoint = calcPath[indexRem].target;
-					}
-						
-					indexRem = calcPath.findIndex(e=> e.target === id);
-			
-					if(indexRem > -1){
-						// calcPath[indexRem].target = newId;
-						sourcePoint = calcPath[indexRem].source;
 						calcPath.splice(indexRem,1);
+					}
+
+					indexRem = calcPath.findIndex(e=> e.target === id);
+
+					if(indexRem > -1){
+						calcPath[indexRem].target = newId;
+						sourcePoint = calcPath[indexRem].source;
 					}
 						
 					deleteEndPointsByElement($('#' + id), false);
