@@ -737,8 +737,9 @@ var parseResult = function(data){
 					indexRem = calcPath.findIndex(e=> e.target === id);
 			
 					if(indexRem > -1){
-						calcPath[indexRem].target = newId;
+						// calcPath[indexRem].target = newId;
 						sourcePoint = calcPath[indexRem].source;
+						calcPath.splice(indexRem,1);
 					}
 						
 					deleteEndPointsByElement($('#' + id), false);
