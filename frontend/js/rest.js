@@ -1,5 +1,5 @@
 
-var serviceURL = "http://localhost:6060/servletexam/mainServlet?action=";
+var serviceURL = "http://172.21.10.31:8089/TournamentServer/servletexam/mainServlet?action=";
 var sessionID;
 
 function getPaths() {
