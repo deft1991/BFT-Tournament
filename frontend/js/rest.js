@@ -54,7 +54,7 @@ function updateData(dataLoad,action,sessionId) {
         type: 'GET',
         crossDomain: true,
         dataType: "json", 
-        ata: {"data": JSON.stringify(dataLoad)},
+        data: {"data": JSON.stringify(dataLoad)},
         success: function (data, textStatus, jqXHR) {
 			alert('updateData. Update succsess. ' +data[0].value);
         },

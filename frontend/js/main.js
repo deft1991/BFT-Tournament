@@ -38,7 +38,7 @@ var getTableFilter = function(){
 	var id = $('#elementId').val();
 	if(storageData[id] !== undefined){
 		var sData = storageData[id].source == undefined ? storageData[id] : storageData[storageData[id].source];	
-		switch(storageData[id].type){
+		switch(sData.type){
 			case "table":
 			case "temp":
 				var data = Array.from($('#tableData').DataTable().data());
